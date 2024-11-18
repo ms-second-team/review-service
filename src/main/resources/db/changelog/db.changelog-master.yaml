@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: vbakhanovich
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            path: migrations/v1_create_reviews.sql
+            relativeToChangelogFile: true
