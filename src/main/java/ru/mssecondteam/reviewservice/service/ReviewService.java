@@ -1,6 +1,6 @@
 package ru.mssecondteam.reviewservice.service;
 
-import ru.mssecondteam.reviewservice.dto.UpdateReviewRequest;
+import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.model.Review;
 
 import java.util.List;
@@ -9,7 +9,7 @@ public interface ReviewService {
 
     Review createReview(Review review, Long userId);
 
-    Review updateReview(Long reviewId, UpdateReviewRequest updateRequest, Long userId);
+    Review updateReview(Long reviewId, ReviewUpdateRequest updateRequest, Long userId);
 
     Review findReviewById(Long reviewId, Long userId);
 

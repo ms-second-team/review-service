@@ -8,7 +8,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.mssecondteam.reviewservice.dto.UpdateReviewRequest;
+import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.exception.NotAuthorizedException;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.model.Review;
@@ -58,7 +58,7 @@ class ReviewServiceImplTest {
         Long userId = 2L;
         Review savedReview = reviewService.createReview(review, userId);
 
-        UpdateReviewRequest updateRequest = UpdateReviewRequest.builder()
+        ReviewUpdateRequest updateRequest = ReviewUpdateRequest.builder()
                 .title("new title")
                 .content("new content")
                 .mark(1)
@@ -82,7 +82,7 @@ class ReviewServiceImplTest {
         Long userId = 2L;
         Review savedReview = reviewService.createReview(review, userId);
 
-        UpdateReviewRequest updateRequest = UpdateReviewRequest.builder()
+        ReviewUpdateRequest updateRequest = ReviewUpdateRequest.builder()
                 .title("new title")
                 .build();
 
@@ -104,7 +104,7 @@ class ReviewServiceImplTest {
         Long userId = 2L;
         Review savedReview = reviewService.createReview(review, userId);
 
-        UpdateReviewRequest updateRequest = UpdateReviewRequest.builder()
+        ReviewUpdateRequest updateRequest = ReviewUpdateRequest.builder()
                 .title("new title")
                 .build();
         Long unauthorizedId = 999L;
@@ -121,7 +121,7 @@ class ReviewServiceImplTest {
     @DisplayName("Update review, not found")
     void updateReview_whenReviewNotFound_shouldThrowNotFoundException() {
         Long userId = 2L;
-        UpdateReviewRequest updateRequest = UpdateReviewRequest.builder()
+        ReviewUpdateRequest updateRequest = ReviewUpdateRequest.builder()
                 .title("new title")
                 .build();
         Long unknownId = 999L;

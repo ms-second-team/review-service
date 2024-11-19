@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.mssecondteam.reviewservice.dto.UpdateReviewRequest;
+import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.exception.NotAuthorizedException;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
@@ -32,7 +32,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Review updateReview(Long reviewId, UpdateReviewRequest updateRequest, Long userId) {
+    public Review updateReview(Long reviewId, ReviewUpdateRequest updateRequest, Long userId) {
         final Review reviewToUpdate = getReviewById(reviewId);
         checkIfUserIsAuthor(reviewToUpdate, userId);
         reviewMapper.updateReview(updateRequest, reviewToUpdate);

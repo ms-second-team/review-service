@@ -6,7 +6,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
 import ru.mssecondteam.reviewservice.dto.ReviewDto;
-import ru.mssecondteam.reviewservice.dto.UpdateReviewRequest;
+import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.model.Review;
 
 import java.util.List;
@@ -21,5 +21,5 @@ public interface ReviewMapper {
     List<ReviewDto> toDtoList(List<Review> eventReviews);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateReview(UpdateReviewRequest updateRequest, @MappingTarget Review review);
+    void updateReview(ReviewUpdateRequest updateRequest, @MappingTarget Review review);
 }

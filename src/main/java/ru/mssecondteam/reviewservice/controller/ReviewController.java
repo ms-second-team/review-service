@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
 import ru.mssecondteam.reviewservice.dto.ReviewDto;
-import ru.mssecondteam.reviewservice.dto.UpdateReviewRequest;
+import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
 import ru.mssecondteam.reviewservice.service.ReviewService;
@@ -48,7 +48,7 @@ public class ReviewController {
 
     @PatchMapping("/{reviewId}")
     public ReviewDto updateReview(@PathVariable Long reviewId,
-                                  @RequestBody @Valid UpdateReviewRequest updateRequest,
+                                  @RequestBody @Valid ReviewUpdateRequest updateRequest,
                                   @RequestHeader("X-User-Id") Long userId) {
         log.info("User with id '{}' updating review with id '{}'", userId, reviewId);
         final Review updatedReview = reviewService.updateReview(reviewId, updateRequest, userId);
@@ -64,9 +64,9 @@ public class ReviewController {
     }
 
     @GetMapping
-    public List<ReviewDto> findReviewsByEventId(@RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
+    public List<ReviewDto> findReviewsByEventId(@RequestParam Long eventId,
+                                                @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
                                                 @RequestParam(defaultValue = "10") @Positive Integer size,
-                                                @RequestParam Long eventId,
                                                 @RequestHeader("X-User-Id") Long userId) {
         log.debug("Requesting reviews for event with id '{}", eventId);
         final List<Review> eventReviews = reviewService.findReviewsByEventId(eventId, page, size, userId);
