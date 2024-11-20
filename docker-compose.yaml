@@ -1,0 +1,24 @@
+services:
+  review-service:
+    build: .
+    image: review-image
+    container_name: review-service
+    ports:
+      - 8090:8090
+    depends_on:
+      - reviews-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://reviews-db:5432/review-db
+      - POSTGRES_DB=tasks-db
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+
+  reviews-db:
+    image: postgres:16-alpine
+    container_name: reviews-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=review-db
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
