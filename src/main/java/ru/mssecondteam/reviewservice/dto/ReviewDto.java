@@ -7,22 +7,26 @@ import java.time.LocalDateTime;
 
 @Builder
 public record ReviewDto(
-         Long id,
+        Long id,
 
-         String title,
+        String title,
 
-         String content,
+        String content,
 
-         String username,
+        String username,
 
-         Integer mark,
+        Integer mark,
 
-         Long eventId,
+        Long eventId,
 
-         @JsonFormat(pattern = "dd.MM.yyyy HH:mm")
-         LocalDateTime createdDateTime,
+        @JsonFormat(pattern = "dd.MM.yyyy HH:mm")
+        LocalDateTime createdDateTime,
 
-         @JsonFormat(pattern = "dd.MM.yyyy HH:mm")
-         LocalDateTime updatedDateTime
+        @JsonFormat(pattern = "dd.MM.yyyy HH:mm")
+        LocalDateTime updatedDateTime,
+
+        Integer likes,
+
+        Integer dislikes
 ) {
 }

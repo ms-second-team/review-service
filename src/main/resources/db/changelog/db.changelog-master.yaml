@@ -7,3 +7,12 @@ databaseChangeLog:
             dbms: postgresql
             path: migrations/v1_create_reviews.sql
             relativeToChangelogFile: true
+
+  - changeSet:
+      id: 2
+      author: Galina
+      changes:
+          - sqlFile:
+              dbms: postgresql
+              path: migrations/v2_create_likes.sql
+              relativeToChangelogFile: true

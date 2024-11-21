@@ -1,0 +1,29 @@
+package ru.mssecondteam.reviewservice;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "likes")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString
+@Builder
+public class Like {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "like_id")
+    private Long id;
+
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Column(name = "review_id")
+    private Long reviewId;
+
+    @Column(name = "is_positive")
+    private Boolean isPositive;
+
+}
