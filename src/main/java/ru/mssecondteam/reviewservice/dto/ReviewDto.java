@@ -25,8 +25,8 @@ public record ReviewDto(
         @JsonFormat(pattern = "dd.MM.yyyy HH:mm")
         LocalDateTime updatedDateTime,
 
-        Integer likes,
+        Long numberOfLikes,
 
-        Integer dislikes
+        Long numberOfDislikes
 ) {
 }

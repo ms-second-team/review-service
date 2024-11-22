@@ -2,6 +2,7 @@ package ru.mssecondteam.reviewservice;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.mssecondteam.reviewservice.model.Review;
 
 @Entity
 @Table(name = "likes")
@@ -20,8 +21,9 @@ public class Like {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "review_id")
-    private Long reviewId;
+    @ManyToOne
+    @JoinColumn(name = "review_id")
+    private Review review;
 
     @Column(name = "is_positive")
     private Boolean isPositive;

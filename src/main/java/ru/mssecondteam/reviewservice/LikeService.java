@@ -1,21 +1,18 @@
 package ru.mssecondteam.reviewservice;
 
-import java.util.Optional;
+import ru.mssecondteam.reviewservice.model.Review;
+
+import java.util.List;
 
 public interface LikeService {
-    void addLike(Long reviewId, Long userId);
+    void addLike(Review review, Long userId, Boolean isPositive);
 
-    void deleteLike(Long reviewId, Long userId);
-
-    void addDislike(Long reviewId, Long userId);
-
-    void deleteDislike(Long reviewId, Long userId);
+    void deleteLike(Long reviewId, Long userId, Boolean isPositive);
 
     Like getLikeByUserIdAndReviewId(Long userId, Long reviewId);
 
-   // Like getDislikeByUserIdAndReviewId(Long userId, Long reviewId);
+    LikeDto getLikesByReviewId(Long reviewId);
 
-    Integer getLikes(Long reviewId);
+    List<LikeDto> getLikesByListReviewsId(List <Long> reviewsIds);
 
-    Integer getDislikes(Long reviewId);
 }

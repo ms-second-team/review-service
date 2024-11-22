@@ -13,7 +13,7 @@ import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
 import ru.mssecondteam.reviewservice.repository.ReviewRepository;
 
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -67,45 +67,31 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Review addLike(Long reviewId, Long userId) {
+    public Review addLike(Long reviewId, Long userId, Boolean isPositive) {
         final Review review = getReviewById(reviewId);
         checkIfUserIsNotAuthor(review, userId);
-        likeService.addLike(reviewId, userId);
-        review.setLikes(likeService.getLikes(reviewId));
-        review.setDislikes(likeService.getDislikes(reviewId));
+        likeService.addLike(review, userId, isPositive);
         log.info("User with id '%s' add like to review with id '%s'", userId, review.getId());
         return review;
     }
 
     @Override
-    public Review deleteLike(Long reviewId, Long userId) {
+    public Review deleteLike(Long reviewId, Long userId, Boolean isPositive) {
         final Review review = getReviewById(reviewId);
-        likeService.deleteLike(reviewId, userId);
-        review.setLikes(likeService.getLikes(reviewId));
-        review.setDislikes(likeService.getDislikes(reviewId));
+        likeService.deleteLike(reviewId, userId, isPositive);
         log.info("User with id '%s' delete like to review with id '%s'", userId, review.getId());
         return review;
     }
 
     @Override
-    public Review addDislike(Long reviewId, Long userId) {
-        final Review review = getReviewById(reviewId);
-        checkIfUserIsNotAuthor(review, userId);
-        likeService.addDislike(reviewId, userId);
-        review.setLikes(likeService.getLikes(reviewId));
-        review.setDislikes(likeService.getDislikes(reviewId));
-        log.info("User with id '%s' add dislike to review with id '%s'", userId, reviewId);
-        return review;
-    }
+    public List<Long> getReviewsIds(List<Review> reviews) {
+        List<Long> reviewsIds = new ArrayList<>();
 
-    @Override
-    public Review deleteDislike(Long reviewId, Long userId) {
-        final Review review = getReviewById(reviewId);
-        likeService.deleteDislike(reviewId, userId);
-        review.setLikes(likeService.getLikes(reviewId));
-        review.setDislikes(likeService.getDislikes(reviewId));
-        log.info("User with id '%s' delete dislike to review with id '%s'", userId, reviewId);
-        return review;
+        for (Review review : reviews) {
+            reviewsIds.add(review.getId());
+        }
+
+        return reviewsIds;
     }
 
     private Review getReviewById(Long reviewId) {

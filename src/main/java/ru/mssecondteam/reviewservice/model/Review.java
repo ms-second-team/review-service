@@ -11,8 +11,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "reviews")
@@ -51,7 +49,4 @@ public class Review {
     @Column(name = "updated_at")
     private LocalDateTime updatedDateTime;
 
-    private Integer likes;
-
-    private Integer dislikes;
 }
