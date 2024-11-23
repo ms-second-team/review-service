@@ -7,9 +7,11 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@Repository("CustomLikeRepositoryImpl")
+@Repository
 @RequiredArgsConstructor
 public class CustomLikeRepositoryImpl implements CustomLikeRepository {
     private final JdbcTemplate jdbcTemplate;
@@ -31,8 +33,7 @@ public class CustomLikeRepositoryImpl implements CustomLikeRepository {
     }
 
     @Override
-    public List<LikeDto> getLikesAndDislikesByReviewsIds(List<Long> reviewsIds) {
-        //???????
+    public Map<Long, LikeDto> getLikesAndDislikesByReviewsIds(List<Long> reviewsIds) {
         String inSql = String.join(",", Collections.nCopies(reviewsIds.size(), "?"));
 
         String sql =
@@ -40,11 +41,19 @@ public class CustomLikeRepositoryImpl implements CustomLikeRepository {
                         "(select count(user_id) from likes where review_id IN (?) and is_positive = true) likes, " +
                         "(select count(user_id) from likes where review_id IN (?) and is_positive = false) dislikes " +
                         "from likes " +
+                        "where review_id IN (?) " +
                         "group by review_id";
 
-        return jdbcTemplate.query(String.format(sql, inSql, inSql), (rs, rowNum) -> makeLikeDto(rs), reviewsIds.toArray(), reviewsIds.toArray());
+        List<LikeDto> dtoList = jdbcTemplate.query(String.format(sql, inSql, inSql), (rs, rowNum) -> makeLikeDto(rs),
+                reviewsIds.toArray(), reviewsIds.toArray());
 
+        Map<Long, LikeDto> likeDtoMap = new HashMap<>();
 
+        for (LikeDto likeDto : dtoList) {
+            likeDtoMap.put(likeDto.reviewId(), likeDto);
+        }
+
+        return likeDtoMap;
     }
 
     private LikeDto makeLikeDto(ResultSet resultSet) throws SQLException {

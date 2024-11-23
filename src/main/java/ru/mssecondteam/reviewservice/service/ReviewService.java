@@ -20,7 +20,4 @@ public interface ReviewService {
     Review addLike(Long reviewId, Long userId, Boolean isPositive);
 
     Review deleteLike(Long reviewId, Long userId, Boolean isPositive);
-
-    List<Long> getReviewsIds(List<Review> reviews);
-
 }

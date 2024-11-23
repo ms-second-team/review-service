@@ -13,7 +13,6 @@ import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
 import ru.mssecondteam.reviewservice.repository.ReviewRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -70,7 +69,7 @@ public class ReviewServiceImpl implements ReviewService {
     public Review addLike(Long reviewId, Long userId, Boolean isPositive) {
         final Review review = getReviewById(reviewId);
         checkIfUserIsNotAuthor(review, userId);
-        likeService.addLike(review, userId, isPositive);
+        likeService.addLikeOrDislike(review, userId, isPositive);
         log.info("User with id '%s' add like to review with id '%s'", userId, review.getId());
         return review;
     }
@@ -78,20 +77,9 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public Review deleteLike(Long reviewId, Long userId, Boolean isPositive) {
         final Review review = getReviewById(reviewId);
-        likeService.deleteLike(reviewId, userId, isPositive);
+        likeService.deleteLikeOrDislike(reviewId, userId, isPositive);
         log.info("User with id '%s' delete like to review with id '%s'", userId, review.getId());
         return review;
-    }
-
-    @Override
-    public List<Long> getReviewsIds(List<Review> reviews) {
-        List<Long> reviewsIds = new ArrayList<>();
-
-        for (Review review : reviews) {
-            reviewsIds.add(review.getId());
-        }
-
-        return reviewsIds;
     }
 
     private Review getReviewById(Long reviewId) {

@@ -27,5 +27,4 @@ public class Like {
 
     @Column(name = "is_positive")
     private Boolean isPositive;
-
 }
