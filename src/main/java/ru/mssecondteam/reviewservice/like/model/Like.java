@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice;
+package ru.mssecondteam.reviewservice.like.model;
 
 import jakarta.persistence.*;
 import lombok.*;

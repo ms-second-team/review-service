@@ -1,5 +1,6 @@
-package ru.mssecondteam.reviewservice;
+package ru.mssecondteam.reviewservice.like.service;
 
+import ru.mssecondteam.reviewservice.like.dto.LikeDto;
 import ru.mssecondteam.reviewservice.model.Review;
 
 import java.util.List;
@@ -10,7 +11,7 @@ public interface LikeService {
 
     void deleteLikeOrDislike(Long reviewId, Long userId, Boolean isPositive);
 
-    LikeDto getNumberOfLikeByReviewId(Long reviewId);
+    LikeDto getNumberOfLikesAndDislikesByReviewId(Long reviewId);
 
-    Map<Long,LikeDto> getNumbersOfLikeByListReviewsId(List <Long> reviewsIds);
+    Map<Long, LikeDto> getNumberOfLikesAndDislikesByListReviewsId(List<Long> reviewsIds);
 }

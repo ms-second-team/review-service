@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.mssecondteam.reviewservice.LikeDto;
-import ru.mssecondteam.reviewservice.LikeService;
+import ru.mssecondteam.reviewservice.like.dto.LikeDto;
+import ru.mssecondteam.reviewservice.like.service.LikeService;
 import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
 import ru.mssecondteam.reviewservice.dto.ReviewDto;
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
@@ -26,13 +26,10 @@ import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
 import ru.mssecondteam.reviewservice.service.ReviewService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static ru.mssecondteam.reviewservice.mapper.ReviewMapper.toDtoListWithLikes;
-import static ru.mssecondteam.reviewservice.mapper.ReviewMapper.toDtoWithLikes;
+import static ru.mssecondteam.reviewservice.mapper.ReviewMapper.*;
 
 @RestController
 @RequestMapping("/reviews")
@@ -62,7 +59,7 @@ public class ReviewController {
                                   @RequestHeader("X-User-Id") Long userId) {
         log.info("User with id '{}' updating review with id '{}'", userId, reviewId);
         final Review updatedReview = reviewService.updateReview(reviewId, updateRequest, userId);
-        final LikeDto likeDto = likeService.getNumberOfLikeByReviewId(updatedReview.getId());
+        final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(updatedReview.getId());
         return toDtoWithLikes(updatedReview, likeDto);
     }
 
@@ -71,7 +68,7 @@ public class ReviewController {
                                     @RequestHeader("X-User-Id") Long userId) {
         log.debug("User with id '{}' requesting review with id '{}'", userId, reviewId);
         final Review review = reviewService.findReviewById(reviewId, userId);
-        final LikeDto likeDto = likeService.getNumberOfLikeByReviewId(review.getId());
+        final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
         return toDtoWithLikes(review, likeDto);
     }
 
@@ -83,7 +80,7 @@ public class ReviewController {
         log.debug("Requesting reviews for event with id '{}", eventId);
         final List<Review> eventReviews = reviewService.findReviewsByEventId(eventId, page, size, userId);
         final List<Long> reviewsIds = getReviewsIds(eventReviews);
-        final Map<Long, LikeDto> likesDto = likeService.getNumbersOfLikeByListReviewsId(reviewsIds);
+        final Map<Long, LikeDto> likesDto = likeService.getNumberOfLikesAndDislikesByListReviewsId(reviewsIds);
         return toDtoListWithLikes(eventReviews, likesDto);
     }
 
@@ -100,8 +97,8 @@ public class ReviewController {
     public ReviewDto addLike(@PathVariable Long reviewId,
                              @RequestHeader("X-User-Id") Long userId) {
         log.info("User with id '{}' add like to review with id '{}'", userId, reviewId);
-        final Review review = reviewService.addLike(reviewId, userId, true);
-        final LikeDto likeDto = likeService.getNumberOfLikeByReviewId(review.getId());
+        final Review review = reviewService.addLikeOrDislike(reviewId, userId, true);
+        final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
         return toDtoWithLikes(review, likeDto);
     }
 
@@ -110,8 +107,8 @@ public class ReviewController {
     public ReviewDto deleteLike(@PathVariable Long reviewId,
                                 @RequestHeader("X-User-Id") Long userId) {
         log.info("User with id '{}' delete like to review with id '{}'", userId, reviewId);
-        final Review review = reviewService.deleteLike(reviewId, userId, true);
-        final LikeDto likeDto = likeService.getNumberOfLikeByReviewId(review.getId());
+        final Review review = reviewService.deleteLikeOrDislike(reviewId, userId, true);
+        final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
         return toDtoWithLikes(review, likeDto);
     }
 
@@ -120,8 +117,8 @@ public class ReviewController {
     public ReviewDto addDislike(@PathVariable Long reviewId,
                                 @RequestHeader("X-User-Id") Long userId) {
         log.info("User with id '{}' add dislike to review with id '{}'", userId, reviewId);
-        final Review review = reviewService.addLike(reviewId, userId, false);
-        final LikeDto likeDto = likeService.getNumberOfLikeByReviewId(review.getId());
+        final Review review = reviewService.addLikeOrDislike(reviewId, userId, false);
+        final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
         return toDtoWithLikes(review, likeDto);
     }
 
@@ -130,15 +127,9 @@ public class ReviewController {
     public ReviewDto deleteDislike(@PathVariable Long reviewId,
                                    @RequestHeader("X-User-Id") Long userId) {
         log.info("User with id '{}' delete dislike to review with id '{}'", userId, reviewId);
-        final Review review = reviewService.deleteLike(reviewId, userId, false);
-        final LikeDto likeDto = likeService.getNumberOfLikeByReviewId(review.getId());
+        final Review review = reviewService.deleteLikeOrDislike(reviewId, userId, false);
+        final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
         return toDtoWithLikes(review, likeDto);
-    }
-
-    private List<Long> getReviewsIds(List<Review> reviews) {
-        return reviews.stream()
-                .map(Review::getId)
-                .collect(Collectors.toList());
     }
 
 }

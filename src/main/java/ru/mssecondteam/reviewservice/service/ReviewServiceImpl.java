@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.mssecondteam.reviewservice.LikeService;
+import ru.mssecondteam.reviewservice.like.service.LikeService;
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.exception.NotAuthorizedException;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
@@ -66,7 +66,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Review addLike(Long reviewId, Long userId, Boolean isPositive) {
+    public Review addLikeOrDislike(Long reviewId, Long userId, Boolean isPositive) {
         final Review review = getReviewById(reviewId);
         checkIfUserIsNotAuthor(review, userId);
         likeService.addLikeOrDislike(review, userId, isPositive);
@@ -75,7 +75,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Review deleteLike(Long reviewId, Long userId, Boolean isPositive) {
+    public Review deleteLikeOrDislike(Long reviewId, Long userId, Boolean isPositive) {
         final Review review = getReviewById(reviewId);
         likeService.deleteLikeOrDislike(reviewId, userId, isPositive);
         log.info("User with id '%s' delete like to review with id '%s'", userId, review.getId());

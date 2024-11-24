@@ -1,8 +1,11 @@
-package ru.mssecondteam.reviewservice;
+package ru.mssecondteam.reviewservice.like.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.mssecondteam.reviewservice.like.model.Like;
+import ru.mssecondteam.reviewservice.like.dto.LikeDto;
+import ru.mssecondteam.reviewservice.like.repository.LikeRepository;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.model.Review;
 
@@ -33,6 +36,9 @@ public class LikeServiceImpl implements LikeService {
     public void deleteLikeOrDislike(Long reviewId, Long userId, Boolean isPositive) {
         Like like = getLikeByUserIdAndReviewId(userId, reviewId);
 
+        if (like == null) {
+            throw new NotFoundException(String.format("Like with userId '%s'  and reviewId was not found", userId, reviewId));
+        }
         if (like.getIsPositive() == isPositive) {
             repository.deleteById(like.getId());
             log.info("User with id '%s' delete '%s' like to review with id '%s'", userId, isPositive, reviewId);
@@ -41,18 +47,19 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
-    public LikeDto getNumberOfLikeByReviewId(Long reviewId) {
-        return repository.getLikesAndDislikesByReviewId(reviewId);
+    public LikeDto getNumberOfLikesAndDislikesByReviewId(Long reviewId) {
+        log.info("Received likes and dislikes for review with id '%s'", reviewId);
+        return repository.getLikesAndDislikesByReviewId(reviewId).orElse(null);
     }
 
     @Override
-    public Map<Long, LikeDto> getNumbersOfLikeByListReviewsId(List<Long> reviewsIds) {
+    public Map<Long, LikeDto> getNumberOfLikesAndDislikesByListReviewsId(List<Long> reviewsIds) {
+        log.info("Received likes and dislikes for reviews with ids '%s'", reviewsIds);
         return repository.getLikesAndDislikesByReviewsIds(reviewsIds);
     }
 
     private Like getLikeByUserIdAndReviewId(Long userId, Long reviewId) {
-        return repository.getLikeByUserIdAndReviewId(userId, reviewId)
-                .orElseThrow(() -> new NotFoundException(String.format("Like with user_id '%s' and review_id was not found", userId, reviewId)));
+        return repository.getLikeByUserIdAndReviewId(userId, reviewId).orElse(null);
     }
 
 }
