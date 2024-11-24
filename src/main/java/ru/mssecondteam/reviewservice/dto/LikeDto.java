@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice.like.dto;
+package ru.mssecondteam.reviewservice.dto;
 
 import lombok.Builder;
 import org.springframework.boot.context.properties.bind.DefaultValue;

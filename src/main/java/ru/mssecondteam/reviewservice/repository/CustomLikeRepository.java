@@ -1,6 +1,6 @@
-package ru.mssecondteam.reviewservice.like.repository;
+package ru.mssecondteam.reviewservice.repository;
 
-import ru.mssecondteam.reviewservice.like.dto.LikeDto;
+import ru.mssecondteam.reviewservice.dto.LikeDto;
 
 import java.util.List;
 import java.util.Map;

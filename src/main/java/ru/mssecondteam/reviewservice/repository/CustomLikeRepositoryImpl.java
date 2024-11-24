@@ -1,9 +1,9 @@
-package ru.mssecondteam.reviewservice.like.repository;
+package ru.mssecondteam.reviewservice.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import ru.mssecondteam.reviewservice.like.dto.LikeDto;
+import ru.mssecondteam.reviewservice.dto.LikeDto;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

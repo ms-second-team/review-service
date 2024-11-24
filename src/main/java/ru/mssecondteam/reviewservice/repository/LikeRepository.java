@@ -1,8 +1,8 @@
-package ru.mssecondteam.reviewservice.like.repository;
+package ru.mssecondteam.reviewservice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import ru.mssecondteam.reviewservice.like.model.Like;
+import ru.mssecondteam.reviewservice.model.Like;
 
 import java.util.Optional;
 

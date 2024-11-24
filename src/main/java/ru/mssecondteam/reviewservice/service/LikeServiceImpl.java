@@ -1,12 +1,12 @@
-package ru.mssecondteam.reviewservice.like.service;
+package ru.mssecondteam.reviewservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
-import ru.mssecondteam.reviewservice.like.dto.LikeDto;
-import ru.mssecondteam.reviewservice.like.model.Like;
-import ru.mssecondteam.reviewservice.like.repository.LikeRepository;
+import ru.mssecondteam.reviewservice.dto.LikeDto;
+import ru.mssecondteam.reviewservice.model.Like;
+import ru.mssecondteam.reviewservice.repository.LikeRepository;
 import ru.mssecondteam.reviewservice.model.Review;
 
 import java.util.List;
