@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice.service;
+package ru.mssecondteam.reviewservice.service.like;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

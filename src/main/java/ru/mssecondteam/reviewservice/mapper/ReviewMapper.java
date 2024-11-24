@@ -15,6 +15,7 @@ import ru.mssecondteam.reviewservice.model.TopReviews;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,7 +45,7 @@ public interface ReviewMapper {
     ReviewDto toDtoWithLikes(Review review, LikeDto likeDto);
 
     default List<ReviewDto> toDtoListWithLikes(List<Review> eventReviews, Map<Long, LikeDto> reviewIdToLikeDto) {
-        final Map<Long, Review> reviewIdToReview = new HashMap<>();
+        final Map<Long, Review> reviewIdToReview = new LinkedHashMap<>();
         eventReviews.forEach(review -> reviewIdToReview.put(review.getId(), review));
         final List<ReviewDto> result = new ArrayList<>();
         for (Long reviewId : reviewIdToReview.keySet()) {
@@ -60,6 +61,4 @@ public interface ReviewMapper {
                 .map(Review::getId)
                 .collect(Collectors.toList());
     }
-
-    TopReviewsDto toDto(TopReviews topReviews);
 }

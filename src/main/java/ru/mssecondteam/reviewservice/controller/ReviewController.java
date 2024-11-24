@@ -17,16 +17,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.mssecondteam.reviewservice.dto.LikeDto;
 import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
 import ru.mssecondteam.reviewservice.dto.ReviewDto;
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
-import ru.mssecondteam.reviewservice.dto.LikeDto;
 import ru.mssecondteam.reviewservice.dto.TopReviewsDto;
-import ru.mssecondteam.reviewservice.model.TopReviews;
-import ru.mssecondteam.reviewservice.service.LikeService;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
+import ru.mssecondteam.reviewservice.model.TopReviews;
 import ru.mssecondteam.reviewservice.service.ReviewService;
+import ru.mssecondteam.reviewservice.service.like.LikeService;
 
 import java.util.List;
 import java.util.Map;
@@ -138,6 +138,23 @@ public class ReviewController {
     public TopReviewsDto getTopReviewsForEvent(@RequestParam Long eventId) {
         log.info("Requesting top reviews for event with id '{}'", eventId);
         final TopReviews topReviews = reviewService.getTopReviews(eventId);
-        return reviewMapper.toDto(topReviews);
+        return getLikesAndMapToDto(topReviews);
+    }
+
+    private TopReviewsDto getLikesAndMapToDto(TopReviews topReviews) {
+        List<Long> bestReviewsIds = topReviews.bestReviews()
+                .stream()
+                .map(Review::getId)
+                .toList();
+        Map<Long, LikeDto> bestLikesDto = likeService.getNumberOfLikesAndDislikesByListReviewsId(bestReviewsIds);
+        List<ReviewDto> bestReviewsDto = reviewMapper.toDtoListWithLikes(topReviews.bestReviews(), bestLikesDto);
+
+        List<Long> worstReviewsIds = topReviews.worstReviews()
+                .stream()
+                .map(Review::getId)
+                .toList();
+        Map<Long, LikeDto> worstLikesDto = likeService.getNumberOfLikesAndDislikesByListReviewsId(worstReviewsIds);
+        List<ReviewDto> worstReviewsDto = reviewMapper.toDtoListWithLikes(topReviews.worstReviews(), worstLikesDto);
+        return new TopReviewsDto(bestReviewsDto, worstReviewsDto);
     }
 }
