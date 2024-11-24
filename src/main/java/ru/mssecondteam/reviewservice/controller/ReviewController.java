@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.mssecondteam.reviewservice.like.dto.LikeDto;
-import ru.mssecondteam.reviewservice.like.service.LikeService;
 import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
 import ru.mssecondteam.reviewservice.dto.ReviewDto;
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
+import ru.mssecondteam.reviewservice.like.dto.LikeDto;
+import ru.mssecondteam.reviewservice.like.service.LikeService;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
 import ru.mssecondteam.reviewservice.service.ReviewService;
@@ -29,7 +29,7 @@ import ru.mssecondteam.reviewservice.service.ReviewService;
 import java.util.List;
 import java.util.Map;
 
-import static ru.mssecondteam.reviewservice.mapper.ReviewMapper.*;
+import static ru.mssecondteam.reviewservice.mapper.ReviewMapper.getReviewsIds;
 
 @RestController
 @RequestMapping("/reviews")
@@ -60,7 +60,7 @@ public class ReviewController {
         log.info("User with id '{}' updating review with id '{}'", userId, reviewId);
         final Review updatedReview = reviewService.updateReview(reviewId, updateRequest, userId);
         final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(updatedReview.getId());
-        return toDtoWithLikes(updatedReview, likeDto);
+        return reviewMapper.toDtoWithLikes(updatedReview, likeDto);
     }
 
     @GetMapping("/{reviewId}")
@@ -69,7 +69,7 @@ public class ReviewController {
         log.debug("User with id '{}' requesting review with id '{}'", userId, reviewId);
         final Review review = reviewService.findReviewById(reviewId, userId);
         final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
-        return toDtoWithLikes(review, likeDto);
+        return reviewMapper.toDtoWithLikes(review, likeDto);
     }
 
     @GetMapping
@@ -81,7 +81,7 @@ public class ReviewController {
         final List<Review> eventReviews = reviewService.findReviewsByEventId(eventId, page, size, userId);
         final List<Long> reviewsIds = getReviewsIds(eventReviews);
         final Map<Long, LikeDto> likesDto = likeService.getNumberOfLikesAndDislikesByListReviewsId(reviewsIds);
-        return toDtoListWithLikes(eventReviews, likesDto);
+        return reviewMapper.toDtoListWithLikes(eventReviews, likesDto);
     }
 
     @DeleteMapping("/{reviewId}")
@@ -99,7 +99,7 @@ public class ReviewController {
         log.info("User with id '{}' add like to review with id '{}'", userId, reviewId);
         final Review review = reviewService.addLikeOrDislike(reviewId, userId, true);
         final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
-        return toDtoWithLikes(review, likeDto);
+        return reviewMapper.toDtoWithLikes(review, likeDto);
     }
 
     @DeleteMapping("/{reviewId}/like")
@@ -109,7 +109,7 @@ public class ReviewController {
         log.info("User with id '{}' delete like to review with id '{}'", userId, reviewId);
         final Review review = reviewService.deleteLikeOrDislike(reviewId, userId, true);
         final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
-        return toDtoWithLikes(review, likeDto);
+        return reviewMapper.toDtoWithLikes(review, likeDto);
     }
 
     @PostMapping("/{reviewId}/dislike")
@@ -119,7 +119,7 @@ public class ReviewController {
         log.info("User with id '{}' add dislike to review with id '{}'", userId, reviewId);
         final Review review = reviewService.addLikeOrDislike(reviewId, userId, false);
         final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
-        return toDtoWithLikes(review, likeDto);
+        return reviewMapper.toDtoWithLikes(review, likeDto);
     }
 
     @DeleteMapping("/{reviewId}/dislike")
@@ -129,7 +129,7 @@ public class ReviewController {
         log.info("User with id '{}' delete dislike to review with id '{}'", userId, reviewId);
         final Review review = reviewService.deleteLikeOrDislike(reviewId, userId, false);
         final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
-        return toDtoWithLikes(review, likeDto);
+        return reviewMapper.toDtoWithLikes(review, likeDto);
     }
 
 }
