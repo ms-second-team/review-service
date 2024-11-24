@@ -28,7 +28,7 @@ class ReviewServiceImplTest {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13.7-alpine");
 
     @Autowired
     private ReviewService reviewService;
@@ -199,9 +199,9 @@ class ReviewServiceImplTest {
         List<Review> reviews = reviewService.findReviewsByEventId(review1.getEventId(), page, size, userId);
 
         assertThat(reviews, notNullValue());
-        assertThat(reviews.size(), is(2));
-        assertThat(reviews.get(0).getId(), is(savedReview1.getId()));
-        assertThat(reviews.get(1).getId(), is(savedReview2.getId()));
+        assertThat(reviews.size(), is(4));
+        assertThat(reviews.get(2).getId(), is(savedReview1.getId()));
+        assertThat(reviews.get(3).getId(), is(savedReview2.getId()));
     }
 
     @Test
@@ -246,6 +246,172 @@ class ReviewServiceImplTest {
         assertThat(ex.getMessage(), is("Review with id '" + unknownId + "' was not found"));
     }
 
+    @Test
+    @DisplayName("Add like")
+    void addLike_whenReviewExists_shouldReturnReview() {
+        Review newReview = createReview(6);
+        Long userId = 2L;
+        Long otherId = 999L;
+
+        Review savedReview = reviewService.createReview(newReview, userId);
+        reviewService.addLikeOrDislike(newReview.getId(), otherId, true);
+
+        Review foundReview = reviewService.findReviewById(savedReview.getId(), userId);
+
+        assertThat(foundReview, notNullValue());
+        assertThat(foundReview.getId(), is(savedReview.getId()));
+        assertThat(foundReview.getAuthorId(), is(savedReview.getAuthorId()));
+        assertThat(foundReview.getCreatedDateTime(), is(savedReview.getCreatedDateTime()));
+        assertThat(foundReview.getUpdatedDateTime(), is(savedReview.getUpdatedDateTime()));
+        assertThat(foundReview.getContent(), is(savedReview.getContent()));
+        assertThat(foundReview.getTitle(), is(savedReview.getTitle()));
+        assertThat(foundReview.getUsername(), is(savedReview.getUsername()));
+    }
+
+    @Test
+    @DisplayName("Add dislike")
+    void addDislike_whenReviewExists_shouldReturnReview() {
+        Review newReview = createReview(7);
+        Long userId = 2L;
+        Long otherId = 999L;
+
+        Review savedReview = reviewService.createReview(newReview, userId);
+        reviewService.addLikeOrDislike(newReview.getId(), otherId, false);
+
+        Review foundReview = reviewService.findReviewById(savedReview.getId(), userId);
+
+        assertThat(foundReview, notNullValue());
+        assertThat(foundReview.getId(), is(savedReview.getId()));
+        assertThat(foundReview.getAuthorId(), is(savedReview.getAuthorId()));
+        assertThat(foundReview.getCreatedDateTime(), is(savedReview.getCreatedDateTime()));
+        assertThat(foundReview.getUpdatedDateTime(), is(savedReview.getUpdatedDateTime()));
+        assertThat(foundReview.getContent(), is(savedReview.getContent()));
+        assertThat(foundReview.getTitle(), is(savedReview.getTitle()));
+        assertThat(foundReview.getUsername(), is(savedReview.getUsername()));
+    }
+
+    @Test
+    @DisplayName("Add like, review not found")
+    void addLike_whenReviewDoesNotExist_shouldThrowNotFoundException() {
+        Long userId = 2L;
+        Long unknownId = 999L;
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> reviewService.addLikeOrDislike(unknownId, userId, true));
+
+        assertThat(ex.getMessage(), is("Review with id '" + unknownId + "' was not found"));
+    }
+
+    @Test
+    @DisplayName("Add dislike, review not found")
+    void addDislike_whenReviewDoesNotExist_shouldThrowNotFoundException() {
+        Long userId = 2L;
+        Long unknownId = 999L;
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> reviewService.addLikeOrDislike(unknownId, userId, false));
+
+        assertThat(ex.getMessage(), is("Review with id '" + unknownId + "' was not found"));
+    }
+
+    @Test
+    @DisplayName("Add like, unauthorized")
+    void ddLike_whenUnauthorized_shouldThrowNotAuthorizedException() {
+        Review newReview = createReview(8);
+        Long userId = 2L;
+        Review savedReview = reviewService.createReview(newReview, userId);
+
+        NotAuthorizedException ex = assertThrows(NotAuthorizedException.class,
+                () -> reviewService.addLikeOrDislike(savedReview.getId(), userId, true));
+
+        assertThat(ex.getMessage(), is("User with id '" + userId + "' is not authorized to add like/dislike review " +
+                "with id '" + savedReview.getId() + "'"));
+    }
+
+    @Test
+    @DisplayName("Add dislike, unauthorized")
+    void addDislike_whenUnauthorized_shouldThrowNotAuthorizedException() {
+        Review newReview = createReview(9);
+        Long userId = 2L;
+        Review savedReview = reviewService.createReview(newReview, userId);
+
+        NotAuthorizedException ex = assertThrows(NotAuthorizedException.class,
+                () -> reviewService.addLikeOrDislike(savedReview.getId(), userId, false));
+
+        assertThat(ex.getMessage(), is("User with id '" + userId + "' is not authorized to add like/dislike review " +
+                "with id '" + savedReview.getId() + "'"));
+    }
+
+    @Test
+    @DisplayName("Delete like")
+    void deleteLike_whenReviewExists_shouldReturnReview() {
+        Review newReview = createReview(10);
+        Long userId = 2L;
+        Long otherId = 999L;
+
+        Review savedReview = reviewService.createReview(newReview, userId);
+        reviewService.addLikeOrDislike(newReview.getId(), otherId, true);
+        reviewService.deleteLikeOrDislike(newReview.getId(), otherId, true);
+
+        Review foundReview = reviewService.findReviewById(savedReview.getId(), userId);
+
+        assertThat(foundReview, notNullValue());
+        assertThat(foundReview.getId(), is(savedReview.getId()));
+        assertThat(foundReview.getAuthorId(), is(savedReview.getAuthorId()));
+        assertThat(foundReview.getCreatedDateTime(), is(savedReview.getCreatedDateTime()));
+        assertThat(foundReview.getUpdatedDateTime(), is(savedReview.getUpdatedDateTime()));
+        assertThat(foundReview.getContent(), is(savedReview.getContent()));
+        assertThat(foundReview.getTitle(), is(savedReview.getTitle()));
+        assertThat(foundReview.getUsername(), is(savedReview.getUsername()));
+    }
+
+    @Test
+    @DisplayName("Delete dislike")
+    void deleteDislike_whenReviewExists_shouldReturnReview() {
+        Review newReview = createReview(11);
+        Long userId = 2L;
+        Long otherId = 999L;
+
+        Review savedReview = reviewService.createReview(newReview, userId);
+        reviewService.addLikeOrDislike(newReview.getId(), otherId, false);
+        reviewService.deleteLikeOrDislike(newReview.getId(), otherId, false);
+
+        Review foundReview = reviewService.findReviewById(savedReview.getId(), userId);
+
+        assertThat(foundReview, notNullValue());
+        assertThat(foundReview.getId(), is(savedReview.getId()));
+        assertThat(foundReview.getAuthorId(), is(savedReview.getAuthorId()));
+        assertThat(foundReview.getCreatedDateTime(), is(savedReview.getCreatedDateTime()));
+        assertThat(foundReview.getUpdatedDateTime(), is(savedReview.getUpdatedDateTime()));
+        assertThat(foundReview.getContent(), is(savedReview.getContent()));
+        assertThat(foundReview.getTitle(), is(savedReview.getTitle()));
+        assertThat(foundReview.getUsername(), is(savedReview.getUsername()));
+    }
+
+    @Test
+    @DisplayName("Delete like, review not found")
+    void deleteLike_whenReviewDoesNotExist_shouldThrowNotFoundException() {
+        Long userId = 2L;
+        Long unknownId = 999L;
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> reviewService.deleteLikeOrDislike(unknownId, userId, true));
+
+        assertThat(ex.getMessage(), is("Review with id '" + unknownId + "' was not found"));
+    }
+
+    @Test
+    @DisplayName("Delete dislike, review not found")
+    void deleteDislike_whenReviewDoesNotExist_shouldThrowNotFoundException() {
+        Long userId = 2L;
+        Long unknownId = 999L;
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> reviewService.deleteLikeOrDislike(unknownId, userId, false));
+
+        assertThat(ex.getMessage(), is("Review with id '" + unknownId + "' was not found"));
+    }
+
     private Review createReview(int id) {
         return Review.builder()
                 .title("review title " + id)
@@ -255,4 +421,5 @@ class ReviewServiceImplTest {
                 .mark(5)
                 .build();
     }
+
 }

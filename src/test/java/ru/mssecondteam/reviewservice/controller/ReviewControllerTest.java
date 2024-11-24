@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import ru.mssecondteam.reviewservice.dto.LikeDto;
 import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
 import ru.mssecondteam.reviewservice.dto.ReviewDto;
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
@@ -21,6 +22,7 @@ import ru.mssecondteam.reviewservice.exception.NotAuthorizedException;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
+import ru.mssecondteam.reviewservice.service.LikeService;
 import ru.mssecondteam.reviewservice.service.ReviewService;
 
 import java.time.LocalDateTime;
@@ -31,6 +33,7 @@ import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -56,6 +59,9 @@ class ReviewControllerTest {
     private ReviewService reviewService;
 
     @MockBean
+    private LikeService likeService;
+
+    @MockBean
     private ReviewMapper reviewMapper;
 
     private NewReviewRequest newReview;
@@ -63,6 +69,8 @@ class ReviewControllerTest {
     private ReviewDto reviewDto;
 
     private Review review;
+
+    private LikeDto likeDto;
 
     private Long userId;
 
@@ -88,6 +96,8 @@ class ReviewControllerTest {
                 .mark(7)
                 .createdDateTime(LocalDateTime.of(2025, 10, 10, 12, 34, 33))
                 .updatedDateTime(LocalDateTime.of(2025, 11, 10, 12, 34, 33))
+                .numberOfLikes(10L)
+                .numberOfDislikes(10L)
                 .build();
         review = Review.builder()
                 .title("title")
@@ -95,6 +105,11 @@ class ReviewControllerTest {
                 .username("username")
                 .eventId(222L)
                 .mark(8)
+                .build();
+        likeDto = LikeDto.builder()
+                .reviewId(1L)
+                .numbersOfLikes(10L)
+                .numbersOfDislikes(10L)
                 .build();
         userId = 1L;
         reviewId = 4L;
@@ -946,4 +961,216 @@ class ReviewControllerTest {
 
         verify(reviewService, times(1)).deleteReviewById(reviewId, userId);
     }
+
+
+    @Test
+    @DisplayName("Add like")
+    @SneakyThrows
+    void addLike_shouldReturn200Status() {
+        when(reviewService.addLikeOrDislike(anyLong(), anyLong(), any()))
+                .thenReturn(review);
+        when(likeService.getNumberOfLikesAndDislikesByReviewId(anyLong()))
+                .thenReturn(likeDto);
+        when(reviewMapper.toDtoWithLikes(any(), any()))
+                .thenReturn(reviewDto);
+
+        mvc.perform(post("/reviews/1/like")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reviewDto))
+                        .header("X-User-Id", userId))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
+                .andExpect(jsonPath("$.title", is(reviewDto.title())))
+                .andExpect(jsonPath("$.content", is(reviewDto.content())))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
+                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
+                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
+
+        verify(reviewService, times(1)).addLikeOrDislike(anyLong(), anyLong(), any());
+        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(any());
+        verify(reviewMapper, times(1)).toDtoWithLikes(any(), any());
+    }
+
+    @Test
+    @DisplayName("Add like, review not found")
+    @SneakyThrows
+    void addLike_whenReviewNotFound_shouldReturn404Status() {
+        doThrow(new NotFoundException("Review was not found"))
+                .when(reviewService).addLikeOrDislike(anyLong(), anyLong(), any());
+
+        mvc.perform(post("/reviews/1/like")
+                        .header("X-User-Id", userId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errors", hasValue("Review was not found")));
+
+        verify(reviewService, times(1)).addLikeOrDislike(anyLong(), anyLong(), any());
+    }
+
+    @Test
+    @DisplayName("Add like, user not authorized to like")
+    @SneakyThrows
+    void addLike_whenNotAuthorized_shouldReturn403Status() {
+        doThrow(new NotAuthorizedException("Not authorized"))
+                .when(reviewService).addLikeOrDislike(anyLong(), anyLong(), any());
+
+        mvc.perform(post("/reviews/1/like")
+                        .header("X-User-Id", userId))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errors", hasValue("Not authorized")));
+
+        verify(reviewService, times(1)).addLikeOrDislike(anyLong(), anyLong(), any());
+    }
+
+    @Test
+    @DisplayName("Add dislike")
+    @SneakyThrows
+    void addDislike_shouldReturn200Status() {
+        when(reviewService.addLikeOrDislike(anyLong(), anyLong(), any()))
+                .thenReturn(review);
+        when(likeService.getNumberOfLikesAndDislikesByReviewId(anyLong()))
+                .thenReturn(likeDto);
+        when(reviewMapper.toDtoWithLikes(any(), any()))
+                .thenReturn(reviewDto);
+
+        mvc.perform(post("/reviews/1/dislike")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reviewDto))
+                        .header("X-User-Id", userId))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
+                .andExpect(jsonPath("$.title", is(reviewDto.title())))
+                .andExpect(jsonPath("$.content", is(reviewDto.content())))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
+                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
+                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
+
+        verify(reviewService, times(1)).addLikeOrDislike(anyLong(), anyLong(), any());
+        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(any());
+        verify(reviewMapper, times(1)).toDtoWithLikes(any(), any());
+    }
+
+    @Test
+    @DisplayName("Add dislike, review not found")
+    @SneakyThrows
+    void addDislike_whenReviewNotFound_shouldReturn404Status() {
+        doThrow(new NotFoundException("Review was not found"))
+                .when(reviewService).addLikeOrDislike(anyLong(), anyLong(), any());
+
+        mvc.perform(post("/reviews/1/dislike")
+                        .header("X-User-Id", userId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errors", hasValue("Review was not found")));
+
+        verify(reviewService, times(1)).addLikeOrDislike(anyLong(), anyLong(), any());
+    }
+
+    @Test
+    @DisplayName("Add dislike, user not authorized to like")
+    @SneakyThrows
+    void addDislike_whenNotAuthorized_shouldReturn403Status() {
+        doThrow(new NotAuthorizedException("Not authorized"))
+                .when(reviewService).addLikeOrDislike(anyLong(), anyLong(), any());
+
+        mvc.perform(post("/reviews/1/dislike")
+                        .header("X-User-Id", userId))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errors", hasValue("Not authorized")));
+
+        verify(reviewService, times(1)).addLikeOrDislike(anyLong(), anyLong(), any());
+    }
+
+    @Test
+    @DisplayName("Delete like")
+    @SneakyThrows
+    void deleteLike_shouldReturn200Status() {
+        when(reviewService.deleteLikeOrDislike(anyLong(), anyLong(), any()))
+                .thenReturn(review);
+        when(likeService.getNumberOfLikesAndDislikesByReviewId(anyLong()))
+                .thenReturn(likeDto);
+        when(reviewMapper.toDtoWithLikes(any(), any()))
+                .thenReturn(reviewDto);
+
+        mvc.perform(delete("/reviews/1/like")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reviewDto))
+                        .header("X-User-Id", userId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
+                .andExpect(jsonPath("$.title", is(reviewDto.title())))
+                .andExpect(jsonPath("$.content", is(reviewDto.content())))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
+                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
+                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
+
+        verify(reviewService, times(1)).deleteLikeOrDislike(anyLong(), anyLong(), any());
+        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(any());
+        verify(reviewMapper, times(1)).toDtoWithLikes(any(), any());
+    }
+
+    @Test
+    @DisplayName("Delete like, like not found")
+    @SneakyThrows
+    void deleteLike_whenReviewNotFound_shouldReturn404Status() {
+        doThrow(new NotFoundException("Like was not found"))
+                .when(reviewService).deleteLikeOrDislike(anyLong(), anyLong(), any());
+
+        mvc.perform(delete("/reviews/1/like")
+                        .header("X-User-Id", userId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errors", hasValue("Like was not found")));
+
+        verify(reviewService, times(1)).deleteLikeOrDislike(anyLong(), anyLong(), any());
+    }
+
+    @Test
+    @DisplayName("Delete dislike")
+    @SneakyThrows
+    void deleteDislike_shouldReturn200Status() {
+        when(reviewService.deleteLikeOrDislike(anyLong(), anyLong(), any()))
+                .thenReturn(review);
+        when(likeService.getNumberOfLikesAndDislikesByReviewId(anyLong()))
+                .thenReturn(likeDto);
+        when(reviewMapper.toDtoWithLikes(any(), any()))
+                .thenReturn(reviewDto);
+
+        mvc.perform(delete("/reviews/1/dislike")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reviewDto))
+                        .header("X-User-Id", userId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
+                .andExpect(jsonPath("$.title", is(reviewDto.title())))
+                .andExpect(jsonPath("$.content", is(reviewDto.content())))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
+                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
+                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
+
+        verify(reviewService, times(1)).deleteLikeOrDislike(anyLong(), anyLong(), any());
+        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(any());
+        verify(reviewMapper, times(1)).toDtoWithLikes(any(), any());
+    }
+
+    @Test
+    @DisplayName("Delete dislike, like not found")
+    @SneakyThrows
+    void deleteDislike_whenReviewNotFound_shouldReturn404Status() {
+        doThrow(new NotFoundException("Like was not found"))
+                .when(reviewService).deleteLikeOrDislike(anyLong(), anyLong(), any());
+
+        mvc.perform(delete("/reviews/1/dislike")
+                        .header("X-User-Id", userId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errors", hasValue("Like was not found")));
+
+        verify(reviewService, times(1)).deleteLikeOrDislike(anyLong(), anyLong(), any());
+    }
+
 }

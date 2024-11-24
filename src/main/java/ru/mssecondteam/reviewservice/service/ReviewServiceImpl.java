@@ -23,6 +23,8 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewMapper reviewMapper;
 
+    private final LikeService likeService;
+
     @Override
     public Review createReview(Review review, Long userId) {
         review.setAuthorId(userId);
@@ -62,6 +64,23 @@ public class ReviewServiceImpl implements ReviewService {
         log.info("Review with id '{}' was deleted", reviewId);
     }
 
+    @Override
+    public Review addLikeOrDislike(Long reviewId, Long userId, Boolean isPositive) {
+        final Review review = getReviewById(reviewId);
+        checkIfUserIsNotAuthor(review, userId);
+        likeService.addLikeOrDislike(review, userId, isPositive);
+        log.info("User with id '%s' add like to review with id '%s'", userId, review.getId());
+        return review;
+    }
+
+    @Override
+    public Review deleteLikeOrDislike(Long reviewId, Long userId, Boolean isPositive) {
+        final Review review = getReviewById(reviewId);
+        likeService.deleteLikeOrDislike(reviewId, userId, isPositive);
+        log.info("User with id '%s' delete like to review with id '%s'", userId, review.getId());
+        return review;
+    }
+
     private Review getReviewById(Long reviewId) {
         return reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new NotFoundException(String.format("Review with id '%s' was not found", reviewId)));
@@ -70,6 +89,13 @@ public class ReviewServiceImpl implements ReviewService {
     private void checkIfUserIsAuthor(Review review, Long userId) {
         if (!review.getAuthorId().equals(userId)) {
             throw new NotAuthorizedException(String.format("User with id '%s' is not authorized to modify review " +
+                    "with id '%s'", userId, review.getId()));
+        }
+    }
+
+    private void checkIfUserIsNotAuthor(Review review, Long userId) {
+        if (review.getAuthorId().equals(userId)) {
+            throw new NotAuthorizedException(String.format("User with id '%s' is not authorized to add like/dislike review " +
                     "with id '%s'", userId, review.getId()));
         }
     }
