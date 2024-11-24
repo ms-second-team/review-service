@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.dto.LikeDto;
 import ru.mssecondteam.reviewservice.model.Like;
-import ru.mssecondteam.reviewservice.repository.LikeRepository;
+import ru.mssecondteam.reviewservice.repository.like.LikeRepository;
 import ru.mssecondteam.reviewservice.model.Review;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice.repository;
+package ru.mssecondteam.reviewservice.repository.like;
 
 import ru.mssecondteam.reviewservice.dto.LikeDto;
 

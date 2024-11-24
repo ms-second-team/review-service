@@ -2,17 +2,22 @@ package ru.mssecondteam.reviewservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.exception.NotAuthorizedException;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
+import ru.mssecondteam.reviewservice.model.TopReviews;
 import ru.mssecondteam.reviewservice.repository.ReviewRepository;
 
 import java.util.List;
+
+import static org.springframework.data.domain.Sort.Direction.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +29,9 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewMapper reviewMapper;
 
     private final LikeService likeService;
+
+    @Value("${app.top-reviews-limit}")
+    private int topReviewsLimit;
 
     @Override
     public Review createReview(Review review, Long userId) {
@@ -79,6 +87,13 @@ public class ReviewServiceImpl implements ReviewService {
         likeService.deleteLikeOrDislike(reviewId, userId, isPositive);
         log.info("User with id '%s' delete like to review with id '%s'", userId, review.getId());
         return review;
+    }
+
+    @Override
+    public TopReviews getTopReviews(Long eventId) {
+        final List<Review> worstReviews = reviewRepository.getTopReviewsForEvent(eventId, topReviewsLimit, ASC);
+        final List<Review> bestReviews = reviewRepository.getTopReviewsForEvent(eventId, topReviewsLimit, DESC);
+        return new TopReviews(bestReviews, worstReviews);
     }
 
     private Review getReviewById(Long reviewId) {

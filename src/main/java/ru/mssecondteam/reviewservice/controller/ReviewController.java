@@ -21,6 +21,8 @@ import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
 import ru.mssecondteam.reviewservice.dto.ReviewDto;
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.dto.LikeDto;
+import ru.mssecondteam.reviewservice.dto.TopReviewsDto;
+import ru.mssecondteam.reviewservice.model.TopReviews;
 import ru.mssecondteam.reviewservice.service.LikeService;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
@@ -132,4 +134,10 @@ public class ReviewController {
         return reviewMapper.toDtoWithLikes(review, likeDto);
     }
 
+    @GetMapping("/top")
+    public TopReviewsDto getTopReviewsForEvent(@RequestParam Long eventId) {
+        log.info("Requesting top reviews for event with id '{}'", eventId);
+        final TopReviews topReviews = reviewService.getTopReviews(eventId);
+        return reviewMapper.toDto(topReviews);
+    }
 }

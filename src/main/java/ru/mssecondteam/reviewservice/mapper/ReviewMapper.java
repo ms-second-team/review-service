@@ -9,7 +9,9 @@ import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
 import ru.mssecondteam.reviewservice.dto.ReviewDto;
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.dto.LikeDto;
+import ru.mssecondteam.reviewservice.dto.TopReviewsDto;
 import ru.mssecondteam.reviewservice.model.Review;
+import ru.mssecondteam.reviewservice.model.TopReviews;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,4 +61,5 @@ public interface ReviewMapper {
                 .collect(Collectors.toList());
     }
 
+    TopReviewsDto toDto(TopReviews topReviews);
 }

@@ -6,7 +6,7 @@ import ru.mssecondteam.reviewservice.model.Review;
 
 import java.util.List;
 
-public interface ReviewRepository extends JpaRepository<Review, Long> {
+public interface ReviewRepository extends JpaRepository<Review, Long>, JdbcReviewRepository {
 
     List<Review> findReviewsByEventId(Long eventId, Pageable pageable);
 }

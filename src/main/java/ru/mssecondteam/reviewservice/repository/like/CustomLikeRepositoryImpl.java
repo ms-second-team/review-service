@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice.repository;
+package ru.mssecondteam.reviewservice.repository.like;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
