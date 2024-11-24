@@ -1,18 +1,22 @@
 package ru.mssecondteam.reviewservice.like.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.mssecondteam.reviewservice.like.dto.LikeDto;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class CustomLikeRepositoryImpl implements CustomLikeRepository {
+
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -25,12 +29,7 @@ public class CustomLikeRepositoryImpl implements CustomLikeRepository {
                         "where review_id = ? " +
                         "group by review_id";
 
-        try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeLikeDto(rs), reviewId));
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
-
+        return jdbcTemplate.query(sql, this::makeLikeDto, reviewId);
     }
 
     @Override
@@ -50,13 +49,15 @@ public class CustomLikeRepositoryImpl implements CustomLikeRepository {
 
     }
 
-    private LikeDto makeLikeDto(ResultSet resultSet) throws SQLException {
-        System.out.println(resultSet);
-        return new LikeDto(
-                resultSet.getLong("review_id"),
-                resultSet.getLong("likes"),
-                resultSet.getLong("dislikes")
-        );
+    private Optional<LikeDto> makeLikeDto(ResultSet resultSet) throws SQLException {
+        if (!resultSet.next()) {
+            return Optional.empty();
+        }
+        return Optional.of(LikeDto.builder()
+                .reviewId(resultSet.getLong("review_id"))
+                .numbersOfLikes(resultSet.getLong("likes"))
+                .numbersOfDislikes(resultSet.getLong("dislikes"))
+                .build());
     }
 
     private Map<Long, LikeDto> mapToReviewIdToLike(ResultSet resultSet) throws SQLException {
@@ -72,5 +73,4 @@ public class CustomLikeRepositoryImpl implements CustomLikeRepository {
 
         return result;
     }
-
 }
