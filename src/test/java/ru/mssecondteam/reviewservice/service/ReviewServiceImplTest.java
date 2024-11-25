@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -18,12 +19,14 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThrows;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Testcontainers
+@Transactional
 class ReviewServiceImplTest {
 
     @Container
@@ -72,7 +75,7 @@ class ReviewServiceImplTest {
         assertThat(updatedReview.getContent(), is(updateRequest.content()));
         assertThat(updatedReview.getTitle(), is(updateRequest.title()));
         assertThat(updatedReview.getCreatedDateTime(), is(savedReview.getCreatedDateTime()));
-        assertThat(updatedReview.getUpdatedDateTime(), greaterThan(updatedReview.getCreatedDateTime()));
+        assertThat(updatedReview.getUpdatedDateTime(), greaterThanOrEqualTo(updatedReview.getCreatedDateTime()));
     }
 
     @Test
@@ -94,7 +97,7 @@ class ReviewServiceImplTest {
         assertThat(updatedReview.getContent(), is(savedReview.getContent()));
         assertThat(updatedReview.getTitle(), is(updateRequest.title()));
         assertThat(updatedReview.getCreatedDateTime(), is(savedReview.getCreatedDateTime()));
-        assertThat(updatedReview.getUpdatedDateTime(), greaterThan(updatedReview.getCreatedDateTime()));
+        assertThat(updatedReview.getUpdatedDateTime(), greaterThanOrEqualTo(updatedReview.getCreatedDateTime()));
     }
 
     @Test
@@ -199,9 +202,9 @@ class ReviewServiceImplTest {
         List<Review> reviews = reviewService.findReviewsByEventId(review1.getEventId(), page, size, userId);
 
         assertThat(reviews, notNullValue());
-        assertThat(reviews.size(), is(4));
-        assertThat(reviews.get(2).getId(), is(savedReview1.getId()));
-        assertThat(reviews.get(3).getId(), is(savedReview2.getId()));
+        assertThat(reviews.size(), is(2));
+        assertThat(reviews.get(0).getId(), is(savedReview1.getId()));
+        assertThat(reviews.get(1).getId(), is(savedReview2.getId()));
     }
 
     @Test

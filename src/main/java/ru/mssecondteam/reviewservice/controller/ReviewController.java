@@ -17,16 +17,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.mssecondteam.reviewservice.dto.EventReviewStats;
 import ru.mssecondteam.reviewservice.dto.LikeDto;
 import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
 import ru.mssecondteam.reviewservice.dto.ReviewDto;
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.dto.TopReviewsDto;
+import ru.mssecondteam.reviewservice.dto.UserReviewStats;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
 import ru.mssecondteam.reviewservice.model.TopReviews;
 import ru.mssecondteam.reviewservice.service.ReviewService;
 import ru.mssecondteam.reviewservice.service.like.LikeService;
+import ru.mssecondteam.reviewservice.service.stats.StatsService;
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +45,8 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     private final LikeService likeService;
+
+    private final StatsService statsService;
 
     private final ReviewMapper reviewMapper;
 
@@ -156,5 +161,17 @@ public class ReviewController {
         Map<Long, LikeDto> worstLikesDto = likeService.getNumberOfLikesAndDislikesByListReviewsId(worstReviewsIds);
         List<ReviewDto> worstReviewsDto = reviewMapper.toDtoListWithLikes(topReviews.worstReviews(), worstLikesDto);
         return new TopReviewsDto(bestReviewsDto, worstReviewsDto);
+    }
+
+    @GetMapping("/stats/events/{eventId}")
+    public EventReviewStats getEventReviewsStats(@PathVariable Long eventId) {
+        log.info("Requesting reviews stats for event with id '{}'", eventId);
+        return statsService.getEventReviewsStats(eventId);
+    }
+
+    @GetMapping("/stats/users/{authorId}")
+    public UserReviewStats getUserReviewsStats(@PathVariable Long authorId) {
+        log.info("Requesting reviews stats for user with id '{}'", authorId);
+        return statsService.getUserReviewsStats(authorId);
     }
 }
