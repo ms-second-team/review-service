@@ -14,19 +14,24 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import ru.mssecondteam.reviewservice.dto.EventReviewStats;
 import ru.mssecondteam.reviewservice.dto.LikeDto;
 import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
 import ru.mssecondteam.reviewservice.dto.ReviewDto;
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
+import ru.mssecondteam.reviewservice.dto.UserReviewStats;
 import ru.mssecondteam.reviewservice.exception.NotAuthorizedException;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
+import ru.mssecondteam.reviewservice.model.TopReviews;
 import ru.mssecondteam.reviewservice.service.ReviewService;
 import ru.mssecondteam.reviewservice.service.like.LikeService;
+import ru.mssecondteam.reviewservice.service.stats.StatsService;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Map;
 
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static org.hamcrest.Matchers.hasValue;
@@ -62,6 +67,9 @@ class ReviewControllerTest {
     private LikeService likeService;
 
     @MockBean
+    private StatsService statsService;
+
+    @MockBean
     private ReviewMapper reviewMapper;
 
     private NewReviewRequest newReview;
@@ -88,24 +96,8 @@ class ReviewControllerTest {
                 .eventId(444L)
                 .mark(6)
                 .build();
-        reviewDto = ReviewDto.builder()
-                .title("dto title")
-                .content("dto content")
-                .username("dto_username")
-                .eventId(333L)
-                .mark(7)
-                .createdDateTime(LocalDateTime.of(2025, 10, 10, 12, 34, 33))
-                .updatedDateTime(LocalDateTime.of(2025, 11, 10, 12, 34, 33))
-                .numberOfLikes(10L)
-                .numberOfDislikes(10L)
-                .build();
-        review = Review.builder()
-                .title("title")
-                .content("content")
-                .username("username")
-                .eventId(222L)
-                .mark(8)
-                .build();
+        reviewDto = createReviewDto(12);
+        review = createReview(1);
         likeDto = LikeDto.builder()
                 .reviewId(1L)
                 .numbersOfLikes(10L)
@@ -1197,4 +1189,108 @@ class ReviewControllerTest {
         verify(reviewService, times(1)).deleteLikeOrDislike(anyLong(), anyLong(), any());
     }
 
+    @Test
+    @DisplayName("Get top reviews")
+    @SneakyThrows
+    void getTopReviewsForEvent_whenEventExists_shouldReturnTopReviews() {
+        Long eventId = 34L;
+        Review badReview = createReview(23);
+        ReviewDto badReviewDto = createReviewDto(342);
+        TopReviews topReviews = new TopReviews(Collections.singletonList(review), Collections.singletonList(badReview));
+
+        when(reviewService.getTopReviews(eventId))
+                .thenReturn(topReviews);
+        when(likeService.getNumberOfLikesAndDislikesByListReviewsId(Collections.singletonList(review.getId())))
+                .thenReturn(Map.of(review.getId(), likeDto));
+        when(reviewMapper.toDtoListWithLikes(Collections.singletonList(review), Map.of(review.getId(), likeDto)))
+                .thenReturn(Collections.singletonList(reviewDto));
+        when(likeService.getNumberOfLikesAndDislikesByListReviewsId(Collections.singletonList(badReview.getId())))
+                .thenReturn(Map.of(badReview.getId(), likeDto));
+        when(reviewMapper.toDtoListWithLikes(Collections.singletonList(badReview), Map.of(badReview.getId(), likeDto)))
+                .thenReturn(Collections.singletonList(badReviewDto));
+
+        mvc.perform(get("/reviews/top")
+                        .param("eventId", String.valueOf(eventId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.bestReviews.length()", is(1)))
+                .andExpect(jsonPath("$.bestReviews.[0].id", is(reviewDto.id()), Long.class))
+                .andExpect(jsonPath("$.worstReviews.length()", is(1)))
+                .andExpect(jsonPath("$.worstReviews.[0].id", is(badReviewDto.id()), Long.class));
+
+        verify(reviewService, times(1)).getTopReviews(eventId);
+        verify(likeService, times(1)).getNumberOfLikesAndDislikesByListReviewsId(
+                Collections.singletonList(review.getId()));
+        verify(reviewMapper, times(1)).toDtoListWithLikes(
+                Collections.singletonList(review), Map.of(review.getId(), likeDto));
+        verify(likeService, times(1)).getNumberOfLikesAndDislikesByListReviewsId(
+                Collections.singletonList(badReview.getId()));
+        verify(reviewMapper, times(1)).toDtoListWithLikes(
+                Collections.singletonList(badReview), Map.of(badReview.getId(), likeDto));
+    }
+
+    @Test
+    @DisplayName("Get reviews stats for event")
+    @SneakyThrows
+    void getEventReviewsStats_shouldReturnEventReviewsStats() {
+        EventReviewStats reviewStats = EventReviewStats.builder().build();
+        Long eventId = 2323L;
+        when(statsService.getEventReviewsStats(eventId))
+                .thenReturn(reviewStats);
+
+        mvc.perform(get("/reviews/stats/events/{eventId}", eventId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.eventId", is(reviewStats.eventId()), Long.class))
+                .andExpect(jsonPath("$.avgMark", is(reviewStats.avgMark())))
+                .andExpect(jsonPath("$.negativeReviewsPercentage", is(reviewStats.negativeReviewsPercentage())))
+                .andExpect(jsonPath("$.positiveReviewsPercentage", is(reviewStats.positiveReviewsPercentage())))
+                .andExpect(jsonPath("$.totalNumberOfReviews", is(reviewStats.totalNumberOfReviews()), Long.class));
+
+        verify(statsService, times(1)).getEventReviewsStats(eventId);
+    }
+
+    @Test
+    @DisplayName("Get reviews stats for user")
+    @SneakyThrows
+    void getUserReviewsStats_shouldReturnUserReviewsStats() {
+        UserReviewStats reviewStats = UserReviewStats.builder().build();
+        Long authorId = 2323L;
+        when(statsService.getUserReviewsStats(authorId))
+                .thenReturn(reviewStats);
+
+        mvc.perform(get("/reviews/stats/users/{authorId}", authorId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId", is(reviewStats.userId()), Long.class))
+                .andExpect(jsonPath("$.avgMark", is(reviewStats.avgMark())))
+                .andExpect(jsonPath("$.negativeReviewsPercentage", is(reviewStats.negativeReviewsPercentage())))
+                .andExpect(jsonPath("$.positiveReviewsPercentage", is(reviewStats.positiveReviewsPercentage())))
+                .andExpect(jsonPath("$.totalNumberOfReviews", is(reviewStats.totalNumberOfReviews()), Long.class));
+
+        verify(statsService, times(1)).getUserReviewsStats(authorId);
+    }
+
+    private ReviewDto createReviewDto(long id) {
+        return ReviewDto.builder()
+                .id(id)
+                .title("bad dto title" + id)
+                .content("bad dto content" + id)
+                .username("dto_username" + id)
+                .eventId(333L)
+                .mark(7)
+                .createdDateTime(LocalDateTime.of(2025, 10, 10, 12, 34, 33))
+                .updatedDateTime(LocalDateTime.of(2025, 11, 10, 12, 34, 33))
+                .numberOfLikes(10L)
+                .numberOfDislikes(10L)
+                .build();
+    }
+
+    private Review createReview(long id) {
+        return Review.builder()
+                .title("title" + id)
+                .content("content" + id)
+                .username("username" + id)
+                .eventId(222L)
+                .mark(8)
+                .id(id)
+                .build();
+    }
 }

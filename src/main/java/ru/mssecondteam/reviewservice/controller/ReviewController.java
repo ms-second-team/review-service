@@ -146,6 +146,18 @@ public class ReviewController {
         return getLikesAndMapToDto(topReviews);
     }
 
+    @GetMapping("/stats/events/{eventId}")
+    public EventReviewStats getEventReviewsStats(@PathVariable Long eventId) {
+        log.info("Requesting reviews stats for event with id '{}'", eventId);
+        return statsService.getEventReviewsStats(eventId);
+    }
+
+    @GetMapping("/stats/users/{authorId}")
+    public UserReviewStats getUserReviewsStats(@PathVariable Long authorId) {
+        log.info("Requesting reviews stats for user with id '{}'", authorId);
+        return statsService.getUserReviewsStats(authorId);
+    }
+
     private TopReviewsDto getLikesAndMapToDto(TopReviews topReviews) {
         List<Long> bestReviewsIds = topReviews.bestReviews()
                 .stream()
@@ -161,17 +173,5 @@ public class ReviewController {
         Map<Long, LikeDto> worstLikesDto = likeService.getNumberOfLikesAndDislikesByListReviewsId(worstReviewsIds);
         List<ReviewDto> worstReviewsDto = reviewMapper.toDtoListWithLikes(topReviews.worstReviews(), worstLikesDto);
         return new TopReviewsDto(bestReviewsDto, worstReviewsDto);
-    }
-
-    @GetMapping("/stats/events/{eventId}")
-    public EventReviewStats getEventReviewsStats(@PathVariable Long eventId) {
-        log.info("Requesting reviews stats for event with id '{}'", eventId);
-        return statsService.getEventReviewsStats(eventId);
-    }
-
-    @GetMapping("/stats/users/{authorId}")
-    public UserReviewStats getUserReviewsStats(@PathVariable Long authorId) {
-        log.info("Requesting reviews stats for user with id '{}'", authorId);
-        return statsService.getUserReviewsStats(authorId);
     }
 }
