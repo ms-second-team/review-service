@@ -2,6 +2,7 @@ package ru.mssecondteam.reviewservice.service;
 
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.model.Review;
+import ru.mssecondteam.reviewservice.model.TopReviews;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface ReviewService {
     Review addLikeOrDislike(Long reviewId, Long userId, Boolean isPositive);
 
     Review deleteLikeOrDislike(Long reviewId, Long userId, Boolean isPositive);
+
+    TopReviews getTopReviews(Long eventId);
 }

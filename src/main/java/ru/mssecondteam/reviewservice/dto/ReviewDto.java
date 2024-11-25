@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 @Builder
 public record ReviewDto(
+
         Long id,
 
         String title,

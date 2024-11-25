@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice.repository;
+package ru.mssecondteam.reviewservice.repository.like;
 
 import ru.mssecondteam.reviewservice.dto.LikeDto;
 
@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface CustomLikeRepository {
+
     Optional<LikeDto> getLikesAndDislikesByReviewId(Long reviewsId);
 
     Map<Long, LikeDto> getLikesAndDislikesByReviewsIds(List<Long> reviewsIds);

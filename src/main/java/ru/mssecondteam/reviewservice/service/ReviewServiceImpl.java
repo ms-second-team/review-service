@@ -2,6 +2,7 @@ package ru.mssecondteam.reviewservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,9 +11,14 @@ import ru.mssecondteam.reviewservice.exception.NotAuthorizedException;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
+import ru.mssecondteam.reviewservice.model.TopReviews;
 import ru.mssecondteam.reviewservice.repository.ReviewRepository;
+import ru.mssecondteam.reviewservice.service.like.LikeService;
 
 import java.util.List;
+
+import static org.springframework.data.domain.Sort.Direction.ASC;
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +30,9 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewMapper reviewMapper;
 
     private final LikeService likeService;
+
+    @Value("${app.top-reviews-limit}")
+    private int topReviewsLimit;
 
     @Override
     public Review createReview(Review review, Long userId) {
@@ -69,7 +78,7 @@ public class ReviewServiceImpl implements ReviewService {
         final Review review = getReviewById(reviewId);
         checkIfUserIsNotAuthor(review, userId);
         likeService.addLikeOrDislike(review, userId, isPositive);
-        log.info("User with id '%s' add like to review with id '%s'", userId, review.getId());
+        log.info("User with id '{}' add like to review with id '{}'", userId, review.getId());
         return review;
     }
 
@@ -77,8 +86,15 @@ public class ReviewServiceImpl implements ReviewService {
     public Review deleteLikeOrDislike(Long reviewId, Long userId, Boolean isPositive) {
         final Review review = getReviewById(reviewId);
         likeService.deleteLikeOrDislike(reviewId, userId, isPositive);
-        log.info("User with id '%s' delete like to review with id '%s'", userId, review.getId());
+        log.info("User with id '{}' delete like to review with id '{}'", userId, review.getId());
         return review;
+    }
+
+    @Override
+    public TopReviews getTopReviews(Long eventId) {
+        final List<Review> worstReviews = reviewRepository.getTopReviewsForEvent(eventId, topReviewsLimit, ASC);
+        final List<Review> bestReviews = reviewRepository.getTopReviewsForEvent(eventId, topReviewsLimit, DESC);
+        return new TopReviews(bestReviews, worstReviews);
     }
 
     private Review getReviewById(Long reviewId) {

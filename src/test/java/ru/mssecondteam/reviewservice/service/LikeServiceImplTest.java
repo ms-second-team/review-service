@@ -10,6 +10,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.mssecondteam.reviewservice.dto.LikeDto;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.model.Review;
+import ru.mssecondteam.reviewservice.service.like.LikeService;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class LikeServiceImplTest {
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13.7-alpine");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
     @Autowired
     private ReviewService reviewService;
