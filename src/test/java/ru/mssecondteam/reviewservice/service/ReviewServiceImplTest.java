@@ -500,5 +500,4 @@ class ReviewServiceImplTest {
                 .mark(5)
                 .build();
     }
-
 }

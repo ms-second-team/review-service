@@ -25,7 +25,7 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public EventReviewStats getEventReviewsStats(Long eventId) {
-        final List<Long> reviewsIds = statsRepository.getReviewsIdsForStats(minNumberOfLikes);
+        final List<Long> reviewsIds = statsRepository.getReviewsIdsForEventStats(minNumberOfLikes, eventId);
         EventReviewStats eventStats = statsRepository.getReviewStatsForEvent(eventId, minPositiveMark, reviewsIds);
         log.info("Acquired review stats for event with id '{}'", eventId);
         return eventStats;
@@ -33,7 +33,7 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public UserReviewStats getUserReviewsStats(Long userId) {
-        final List<Long> reviewsIds = statsRepository.getReviewsIdsForStats(minNumberOfLikes);
+        final List<Long> reviewsIds = statsRepository.getReviewsIdsForUserStats(minNumberOfLikes, userId);
         UserReviewStats userStats = statsRepository.getReviewStatsForUser(userId, minPositiveMark, reviewsIds);
         log.info("Acquired review stats for user with id '{}'", userId);
         return userStats;

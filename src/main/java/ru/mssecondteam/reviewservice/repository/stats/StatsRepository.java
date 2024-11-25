@@ -11,5 +11,7 @@ public interface StatsRepository {
 
     UserReviewStats getReviewStatsForUser(Long authorId, int minPositiveMark, List<Long> reviewIds);
 
-    List<Long> getReviewsIdsForStats(int minNumberOfLikes);
+    List<Long> getReviewsIdsForEventStats(int minNumberOfLikes, Long eventId);
+
+    List<Long> getReviewsIdsForUserStats(int minNumberOfLikes, Long authorId);
 }
