@@ -20,11 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
 import ru.mssecondteam.reviewservice.dto.ReviewDto;
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
+import ru.mssecondteam.reviewservice.dto.LikeDto;
+import ru.mssecondteam.reviewservice.service.LikeService;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
 import ru.mssecondteam.reviewservice.service.ReviewService;
 
 import java.util.List;
+import java.util.Map;
+
+import static ru.mssecondteam.reviewservice.mapper.ReviewMapper.getReviewsIds;
 
 @RestController
 @RequestMapping("/reviews")
@@ -33,6 +38,8 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
+
+    private final LikeService likeService;
 
     private final ReviewMapper reviewMapper;
 
@@ -52,7 +59,8 @@ public class ReviewController {
                                   @RequestHeader("X-User-Id") Long userId) {
         log.info("User with id '{}' updating review with id '{}'", userId, reviewId);
         final Review updatedReview = reviewService.updateReview(reviewId, updateRequest, userId);
-        return reviewMapper.toDto(updatedReview);
+        final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(updatedReview.getId());
+        return reviewMapper.toDtoWithLikes(updatedReview, likeDto);
     }
 
     @GetMapping("/{reviewId}")
@@ -60,7 +68,8 @@ public class ReviewController {
                                     @RequestHeader("X-User-Id") Long userId) {
         log.debug("User with id '{}' requesting review with id '{}'", userId, reviewId);
         final Review review = reviewService.findReviewById(reviewId, userId);
-        return reviewMapper.toDto(review);
+        final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
+        return reviewMapper.toDtoWithLikes(review, likeDto);
     }
 
     @GetMapping
@@ -70,7 +79,9 @@ public class ReviewController {
                                                 @RequestHeader("X-User-Id") Long userId) {
         log.debug("Requesting reviews for event with id '{}", eventId);
         final List<Review> eventReviews = reviewService.findReviewsByEventId(eventId, page, size, userId);
-        return reviewMapper.toDtoList(eventReviews);
+        final List<Long> reviewsIds = getReviewsIds(eventReviews);
+        final Map<Long, LikeDto> likesDto = likeService.getNumberOfLikesAndDislikesByListReviewsId(reviewsIds);
+        return reviewMapper.toDtoListWithLikes(eventReviews, likesDto);
     }
 
     @DeleteMapping("/{reviewId}")
@@ -80,4 +91,45 @@ public class ReviewController {
         log.info("User with id '{}' deleting review with id '{}'", userId, reviewId);
         reviewService.deleteReviewById(reviewId, userId);
     }
+
+    @PostMapping("/{reviewId}/like")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ReviewDto addLike(@PathVariable Long reviewId,
+                             @RequestHeader("X-User-Id") Long userId) {
+        log.info("User with id '{}' add like to review with id '{}'", userId, reviewId);
+        final Review review = reviewService.addLikeOrDislike(reviewId, userId, true);
+        final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
+        return reviewMapper.toDtoWithLikes(review, likeDto);
+    }
+
+    @DeleteMapping("/{reviewId}/like")
+    @ResponseStatus(HttpStatus.OK)
+    public ReviewDto deleteLike(@PathVariable Long reviewId,
+                                @RequestHeader("X-User-Id") Long userId) {
+        log.info("User with id '{}' delete like to review with id '{}'", userId, reviewId);
+        final Review review = reviewService.deleteLikeOrDislike(reviewId, userId, true);
+        final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
+        return reviewMapper.toDtoWithLikes(review, likeDto);
+    }
+
+    @PostMapping("/{reviewId}/dislike")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ReviewDto addDislike(@PathVariable Long reviewId,
+                                @RequestHeader("X-User-Id") Long userId) {
+        log.info("User with id '{}' add dislike to review with id '{}'", userId, reviewId);
+        final Review review = reviewService.addLikeOrDislike(reviewId, userId, false);
+        final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
+        return reviewMapper.toDtoWithLikes(review, likeDto);
+    }
+
+    @DeleteMapping("/{reviewId}/dislike")
+    @ResponseStatus(HttpStatus.OK)
+    public ReviewDto deleteDislike(@PathVariable Long reviewId,
+                                   @RequestHeader("X-User-Id") Long userId) {
+        log.info("User with id '{}' delete dislike to review with id '{}'", userId, reviewId);
+        final Review review = reviewService.deleteLikeOrDislike(reviewId, userId, false);
+        final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
+        return reviewMapper.toDtoWithLikes(review, likeDto);
+    }
+
 }

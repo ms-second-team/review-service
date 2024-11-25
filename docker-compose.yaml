@@ -9,8 +9,8 @@ services:
       - reviews-db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://reviews-db:5432/review-db
-      - POSTGRES_DB=tasks-db
-      - POSTGRES_USER=root
+      - POSTGRES_DB=review-db
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=root
 
   reviews-db:
@@ -20,5 +20,5 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_DB=review-db
-      - POSTGRES_USER=root
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=root

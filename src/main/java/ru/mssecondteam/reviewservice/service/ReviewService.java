@@ -16,4 +16,8 @@ public interface ReviewService {
     List<Review> findReviewsByEventId(Long eventId, Integer page, Integer size, Long userId);
 
     void deleteReviewById(Long reviewId, Long userId);
+
+    Review addLikeOrDislike(Long reviewId, Long userId, Boolean isPositive);
+
+    Review deleteLikeOrDislike(Long reviewId, Long userId, Boolean isPositive);
 }
