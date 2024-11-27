@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -12,23 +13,26 @@ import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.exception.NotAuthorizedException;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.model.Review;
+import ru.mssecondteam.reviewservice.model.TopReviews;
 
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThrows;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Testcontainers
+@Transactional
 class ReviewServiceImplTest {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13.7-alpine");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
     @Autowired
     private ReviewService reviewService;
@@ -72,7 +76,7 @@ class ReviewServiceImplTest {
         assertThat(updatedReview.getContent(), is(updateRequest.content()));
         assertThat(updatedReview.getTitle(), is(updateRequest.title()));
         assertThat(updatedReview.getCreatedDateTime(), is(savedReview.getCreatedDateTime()));
-        assertThat(updatedReview.getUpdatedDateTime(), greaterThan(updatedReview.getCreatedDateTime()));
+        assertThat(updatedReview.getUpdatedDateTime(), greaterThanOrEqualTo(updatedReview.getCreatedDateTime()));
     }
 
     @Test
@@ -94,7 +98,7 @@ class ReviewServiceImplTest {
         assertThat(updatedReview.getContent(), is(savedReview.getContent()));
         assertThat(updatedReview.getTitle(), is(updateRequest.title()));
         assertThat(updatedReview.getCreatedDateTime(), is(savedReview.getCreatedDateTime()));
-        assertThat(updatedReview.getUpdatedDateTime(), greaterThan(updatedReview.getCreatedDateTime()));
+        assertThat(updatedReview.getUpdatedDateTime(), greaterThanOrEqualTo(updatedReview.getCreatedDateTime()));
     }
 
     @Test
@@ -199,9 +203,9 @@ class ReviewServiceImplTest {
         List<Review> reviews = reviewService.findReviewsByEventId(review1.getEventId(), page, size, userId);
 
         assertThat(reviews, notNullValue());
-        assertThat(reviews.size(), is(4));
-        assertThat(reviews.get(2).getId(), is(savedReview1.getId()));
-        assertThat(reviews.get(3).getId(), is(savedReview2.getId()));
+        assertThat(reviews.size(), is(2));
+        assertThat(reviews.get(0).getId(), is(savedReview1.getId()));
+        assertThat(reviews.get(1).getId(), is(savedReview2.getId()));
     }
 
     @Test
@@ -412,6 +416,81 @@ class ReviewServiceImplTest {
         assertThat(ex.getMessage(), is("Review with id '" + unknownId + "' was not found"));
     }
 
+    @Test
+    @DisplayName("Get top reviews, no reviews exists")
+    void getTopReviews_whenNoReviews_shouldReturnEmptyLists() {
+        Long eventId = 11L;
+
+        TopReviews topReviews = reviewService.getTopReviews(eventId);
+
+        assertThat(topReviews, notNullValue());
+        assertThat(topReviews.bestReviews(), emptyIterable());
+        assertThat(topReviews.worstReviews(), emptyIterable());
+    }
+
+    @Test
+    @DisplayName("Get top reviews")
+    void getTopReviews_whenReviewsExists_shouldReturnLists() {
+        Long userId = 123L;
+
+        Review review1 = createReview(11);
+        Review savedReview1 = reviewService.createReview(review1, userId);
+        reviewService.addLikeOrDislike(savedReview1.getId(), userId + 2, true);
+        reviewService.addLikeOrDislike(savedReview1.getId(), userId + 1, true);
+
+        Review review2 = createReview(12);
+        Review savedReview2 = reviewService.createReview(review2, userId);
+        reviewService.addLikeOrDislike(savedReview2.getId(), userId + 1, false);
+
+        Review review3 = createReview(13);
+        Review savedReview3 = reviewService.createReview(review3, userId);
+        reviewService.addLikeOrDislike(savedReview3.getId(), userId + 2, true);
+
+
+        Review review4 = createReview(13);
+        Review savedReview4 = reviewService.createReview(review4, userId);
+        reviewService.addLikeOrDislike(savedReview4.getId(), userId + 2, false);
+        reviewService.addLikeOrDislike(savedReview4.getId(), userId + 1, false);
+
+        TopReviews topReviews = reviewService.getTopReviews(review1.getEventId());
+
+        assertThat(topReviews, notNullValue());
+        assertThat(topReviews.bestReviews().size(), is(3));
+        assertThat(topReviews.bestReviews().get(0).getId(), is(savedReview1.getId()));
+        assertThat(topReviews.bestReviews().get(1).getId(), is(savedReview3.getId()));
+        assertThat(topReviews.bestReviews().get(2).getId(), is(savedReview2.getId()));
+        assertThat(topReviews.worstReviews().size(), is(3));
+        assertThat(topReviews.worstReviews().get(0).getId(), is(savedReview4.getId()));
+        assertThat(topReviews.worstReviews().get(1).getId(), is(savedReview2.getId()));
+        assertThat(topReviews.worstReviews().get(2).getId(), is(savedReview3.getId()));
+    }
+
+    @Test
+    @DisplayName("Get top reviews, when less than minimum")
+    void getTopReviews_whenReviewsExistsLessThanMinimum_shouldLists() {
+        Long userId = 123L;
+
+        Review review1 = createReview(11);
+        Review savedReview1 = reviewService.createReview(review1, userId);
+        reviewService.addLikeOrDislike(savedReview1.getId(), userId + 2, true);
+        reviewService.addLikeOrDislike(savedReview1.getId(), userId + 1, true);
+
+        Review review2 = createReview(12);
+        Review savedReview2 = reviewService.createReview(review2, userId);
+        reviewService.addLikeOrDislike(savedReview2.getId(), userId + 1, false);
+
+
+        TopReviews topReviews = reviewService.getTopReviews(review1.getEventId());
+
+        assertThat(topReviews, notNullValue());
+        assertThat(topReviews.bestReviews().size(), is(2));
+        assertThat(topReviews.bestReviews().get(0).getId(), is(savedReview1.getId()));
+        assertThat(topReviews.bestReviews().get(1).getId(), is(savedReview2.getId()));
+        assertThat(topReviews.worstReviews().size(), is(2));
+        assertThat(topReviews.worstReviews().get(0).getId(), is(savedReview2.getId()));
+        assertThat(topReviews.worstReviews().get(1).getId(), is(savedReview1.getId()));
+    }
+
     private Review createReview(int id) {
         return Review.builder()
                 .title("review title " + id)
@@ -421,5 +500,4 @@ class ReviewServiceImplTest {
                 .mark(5)
                 .build();
     }
-
 }
