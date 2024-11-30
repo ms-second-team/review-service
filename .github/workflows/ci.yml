@@ -15,7 +15,6 @@ jobs:
       - name: Checkstyle
         uses: dbelyaev/action-checkstyle@master
         with:
-          reporter: github-pr-review
           github_token: ${{ secrets.GITHUB_TOKEN }}
           level: warning
           fail_level: error
@@ -52,4 +51,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/registration_service
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/review-service
