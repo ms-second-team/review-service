@@ -1,8 +1,6 @@
 name: build and test
 
 on:
-  push:
-    branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
@@ -19,7 +17,7 @@ jobs:
           level: warning
           fail_level: error
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21 corretto
         uses: actions/setup-java@v4
         with:
           java-version: '21'

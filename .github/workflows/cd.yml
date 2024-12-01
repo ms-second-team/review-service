@@ -1,0 +1,20 @@
+name: Deploy on server via docker
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Staging server
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER:  ${{ secrets.SSH_USER }}
+          SCRIPT_BEFORE: |
+            cd deploy
+            ./service-update.sh ${{ vars.DOCKER_CONTAINER_NAME }}
+          SCRIPT_BEFORE_REQUIRED: true
