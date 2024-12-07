@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice.dto;
+package ru.mssecondteam.reviewservice.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
@@ -8,28 +8,17 @@ import java.time.LocalDateTime;
 import static ru.mssecondteam.reviewservice.Constants.DATA_PATTERN;
 
 @Builder
-public record ReviewDto(
-
+public record EventDto(
         Long id,
-
-        String title,
-
-        String content,
-
-        String username,
-
-        Integer mark,
-
-        Long eventId,
-
+        String name,
+        String description,
         @JsonFormat(pattern = DATA_PATTERN)
         LocalDateTime createdDateTime,
-
         @JsonFormat(pattern = DATA_PATTERN)
-        LocalDateTime updatedDateTime,
-
-        Long numberOfLikes,
-
-        Long numberOfDislikes
+        LocalDateTime startDateTime,
+        @JsonFormat(pattern = DATA_PATTERN)
+        LocalDateTime endDateTime,
+        String location,
+        Long ownerId
 ) {
 }

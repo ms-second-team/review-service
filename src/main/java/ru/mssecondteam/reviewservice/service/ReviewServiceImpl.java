@@ -31,12 +31,18 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final LikeService likeService;
 
+    private final EventServiceHelper eventServiceHelper;
+
+    private final RegistrationServiceHelper registrationServiceHelper;
+
     @Value("${app.top-reviews-limit}")
     private int topReviewsLimit;
 
     @Override
     public Review createReview(Review review, Long userId) {
         review.setAuthorId(userId);
+        eventServiceHelper.checkThatEventHasPassedAndUserIsEventTeamMembers(review.getAuthorId(), review.getId());
+        registrationServiceHelper.checkUserApprovedForEvent(review.getEventId(), review.getUsername());
         final Review savedReview = reviewRepository.save(review);
         log.info("Review with id '{}' was created", savedReview.getId());
         return savedReview;
