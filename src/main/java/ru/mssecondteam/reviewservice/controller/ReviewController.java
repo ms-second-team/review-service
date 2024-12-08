@@ -1,5 +1,12 @@
 package ru.mssecondteam.reviewservice.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -40,20 +47,25 @@ import static ru.mssecondteam.reviewservice.mapper.ReviewMapper.getReviewsIds;
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Reviews API", description = "API for feedback management")
 public class ReviewController {
 
     private final ReviewService reviewService;
-
     private final LikeService likeService;
-
     private final StatsService statsService;
-
     private final ReviewMapper reviewMapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReviewDto createReview(@RequestBody @Valid NewReviewRequest newReview,
-                                  @RequestHeader("X-User-Id") Long userId) {
+    @Operation(summary = "Create a new review", description = "Allows the user to create a new review for a past event they participated in")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Review successfully created",
+                    content = @Content(schema = @Schema(implementation = ReviewDto.class))),
+            @ApiResponse(responseCode = "400", description = "Incorrect data")
+    })
+    public ReviewDto createReview(
+            @RequestBody @Valid NewReviewRequest newReview,
+            @RequestHeader("X-User-Id") @Parameter(description = "ID of the user creating the review") Long userId) {
         log.info("User with id '{}' publishing review for event with id '{}", userId, newReview.eventId());
         final Review review = reviewMapper.toModel(newReview);
         final Review createdReview = reviewService.createReview(review, userId);
@@ -61,9 +73,17 @@ public class ReviewController {
     }
 
     @PatchMapping("/{reviewId}")
-    public ReviewDto updateReview(@PathVariable Long reviewId,
-                                  @RequestBody @Valid ReviewUpdateRequest updateRequest,
-                                  @RequestHeader("X-User-Id") Long userId) {
+    @Operation(summary = "Update Review", description = "Updates an existing review by its ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "The review has been successfully updated",
+                    content = @Content(schema = @Schema(implementation = ReviewDto.class))),
+            @ApiResponse(responseCode = "404", description = "Feedback not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameters")
+    })
+    public ReviewDto updateReview(
+            @PathVariable @Parameter(description = "Review ID to update") Long reviewId,
+            @RequestBody @Valid ReviewUpdateRequest updateRequest,
+            @RequestHeader("X-User-Id") @Parameter(description = "User ID of the user updating the review") Long userId) {
         log.info("User with id '{}' updating review with id '{}'", userId, reviewId);
         final Review updatedReview = reviewService.updateReview(reviewId, updateRequest, userId);
         final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(updatedReview.getId());
@@ -71,8 +91,15 @@ public class ReviewController {
     }
 
     @GetMapping("/{reviewId}")
-    public ReviewDto findReviewById(@PathVariable Long reviewId,
-                                    @RequestHeader("X-User-Id") Long userId) {
+    @Operation(summary = "Get review by ID", description = "Returns a review with the specified ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Review found",
+                    content = @Content(schema = @Schema(implementation = ReviewDto.class))),
+            @ApiResponse(responseCode = "404", description = "Review not found")
+    })
+    public ReviewDto findReviewById(
+            @PathVariable @Parameter(description = "Review ID") Long reviewId,
+            @RequestHeader("X-User-Id") @Parameter(description = "ID of the user requesting review") Long userId) {
         log.debug("User with id '{}' requesting review with id '{}'", userId, reviewId);
         final Review review = reviewService.findReviewById(reviewId, userId);
         final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
@@ -80,10 +107,17 @@ public class ReviewController {
     }
 
     @GetMapping
-    public List<ReviewDto> findReviewsByEventId(@RequestParam Long eventId,
-                                                @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
-                                                @RequestParam(defaultValue = "10") @Positive Integer size,
-                                                @RequestHeader("X-User-Id") Long userId) {
+    @Operation(summary = "Get reviews for an event", description = "Returns a list of reviews for the specified event with pagination support")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Reviews successfully received",
+                    content = @Content(schema = @Schema(implementation = ReviewDto.class))),
+            @ApiResponse(responseCode = "400", description = "Incorrect data")
+    })
+    public List<ReviewDto> findReviewsByEventId(
+            @RequestParam @Parameter(description = "Review ID") Long eventId,
+            @RequestParam(defaultValue = "0") @PositiveOrZero @Parameter(description = "Page number") Integer page,
+            @RequestParam(defaultValue = "10") @Positive @Parameter(description = "Page size") Integer size,
+            @RequestHeader("X-User-Id") @Parameter(description = "User ID") Long userId) {
         log.debug("Requesting reviews for event with id '{}", eventId);
         final List<Review> eventReviews = reviewService.findReviewsByEventId(eventId, page, size, userId);
         final List<Long> reviewsIds = getReviewsIds(eventReviews);
@@ -93,16 +127,29 @@ public class ReviewController {
 
     @DeleteMapping("/{reviewId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteReviewById(@PathVariable Long reviewId,
-                                 @RequestHeader("X-User-Id") Long userId) {
+    @Operation(summary = "Delete review", description = "Deletes a review by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Review successfully deleted"),
+            @ApiResponse(responseCode = "404", description = "Review not found")
+    })
+    public void deleteReviewById(
+            @PathVariable @Parameter(description = "Review ID for deletion") Long reviewId,
+            @RequestHeader("X-User-Id") @Parameter(description = "ID of the user deleting the review") Long userId) {
         log.info("User with id '{}' deleting review with id '{}'", userId, reviewId);
         reviewService.deleteReviewById(reviewId, userId);
     }
 
     @PostMapping("/{reviewId}/like")
     @ResponseStatus(HttpStatus.CREATED)
-    public ReviewDto addLike(@PathVariable Long reviewId,
-                             @RequestHeader("X-User-Id") Long userId) {
+    @Operation(summary = "Add a like", description = "Adds a like to a review by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Like was added",
+                    content = @Content(schema = @Schema(implementation = ReviewDto.class))),
+            @ApiResponse(responseCode = "404", description = "Review not found")
+    })
+    public ReviewDto addLike(
+            @PathVariable @Parameter(description = "Review ID") Long reviewId,
+            @RequestHeader("X-User-Id") @Parameter(description = "ID of the user adding the like") Long userId) {
         log.info("User with id '{}' add like to review with id '{}'", userId, reviewId);
         final Review review = reviewService.addLikeOrDislike(reviewId, userId, true);
         final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
@@ -111,8 +158,15 @@ public class ReviewController {
 
     @DeleteMapping("/{reviewId}/like")
     @ResponseStatus(HttpStatus.OK)
-    public ReviewDto deleteLike(@PathVariable Long reviewId,
-                                @RequestHeader("X-User-Id") Long userId) {
+    @Operation(summary = "Delete like", description = "Removes likes from a user from a review by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Like was deleted",
+                    content = @Content(schema = @Schema(implementation = ReviewDto.class))),
+            @ApiResponse(responseCode = "404", description = "Review not found")
+    })
+    public ReviewDto deleteLike(
+            @PathVariable @Parameter(description = "Review ID") Long reviewId,
+            @RequestHeader("X-User-Id") @Parameter(description = "User ID") Long userId) {
         log.info("User with id '{}' delete like to review with id '{}'", userId, reviewId);
         final Review review = reviewService.deleteLikeOrDislike(reviewId, userId, true);
         final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
@@ -121,8 +175,15 @@ public class ReviewController {
 
     @PostMapping("/{reviewId}/dislike")
     @ResponseStatus(HttpStatus.CREATED)
-    public ReviewDto addDislike(@PathVariable Long reviewId,
-                                @RequestHeader("X-User-Id") Long userId) {
+    @Operation(summary = "Add a dislike", description = "Adds a dislike to a review by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Dislike was added",
+                    content = @Content(schema = @Schema(implementation = ReviewDto.class))),
+            @ApiResponse(responseCode = "404", description = "Review not found")
+    })
+    public ReviewDto addDislike(
+            @PathVariable @Parameter(description = "Review ID") Long reviewId,
+            @RequestHeader("X-User-Id") @Parameter(description = "ID of the user adding the dislike") Long userId) {
         log.info("User with id '{}' add dislike to review with id '{}'", userId, reviewId);
         final Review review = reviewService.addLikeOrDislike(reviewId, userId, false);
         final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
@@ -131,8 +192,15 @@ public class ReviewController {
 
     @DeleteMapping("/{reviewId}/dislike")
     @ResponseStatus(HttpStatus.OK)
-    public ReviewDto deleteDislike(@PathVariable Long reviewId,
-                                   @RequestHeader("X-User-Id") Long userId) {
+    @Operation(summary = "Delete dislike", description = "Removes dislikes from a user from a review by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Dislike was deleted",
+                    content = @Content(schema = @Schema(implementation = ReviewDto.class))),
+            @ApiResponse(responseCode = "404", description = "Review not found")
+    })
+    public ReviewDto deleteDislike(
+            @PathVariable @Parameter(description = "Review ID") Long reviewId,
+            @RequestHeader("X-User-Id") @Parameter(description = "User ID") Long userId) {
         log.info("User with id '{}' delete dislike to review with id '{}'", userId, reviewId);
         final Review review = reviewService.deleteLikeOrDislike(reviewId, userId, false);
         final LikeDto likeDto = likeService.getNumberOfLikesAndDislikesByReviewId(review.getId());
@@ -140,20 +208,41 @@ public class ReviewController {
     }
 
     @GetMapping("/top")
-    public TopReviewsDto getTopReviewsForEvent(@RequestParam Long eventId) {
+    @Operation(summary = "Get top reviews", description = "Returns the best and worst reviews for the event with the specified ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Top reviews have been successfully received",
+                    content = @Content(schema = @Schema(implementation = TopReviewsDto.class))),
+            @ApiResponse(responseCode = "404", description = "Review not found")
+    })
+    public TopReviewsDto getTopReviewsForEvent(
+            @RequestParam @Parameter(description = "Review ID") Long eventId) {
         log.info("Requesting top reviews for event with id '{}'", eventId);
         final TopReviews topReviews = reviewService.getTopReviews(eventId);
         return getLikesAndMapToDto(topReviews);
     }
 
     @GetMapping("/stats/events/{eventId}")
-    public EventReviewStats getEventReviewsStats(@PathVariable Long eventId) {
+    @Operation(summary = "Get event review statistics", description = "Returns review statistics for the event by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Statistics successfully received",
+                    content = @Content(schema = @Schema(implementation = EventReviewStats.class))),
+            @ApiResponse(responseCode = "404", description = "Review not found")
+    })
+    public EventReviewStats getEventReviewsStats(
+            @PathVariable @Parameter(description = "Review ID") Long eventId) {
         log.info("Requesting reviews stats for event with id '{}'", eventId);
         return statsService.getEventReviewsStats(eventId);
     }
 
     @GetMapping("/stats/users/{authorId}")
-    public UserReviewStats getUserReviewsStats(@PathVariable Long authorId) {
+    @Operation(summary = "Get user review statistics", description = "Returns review statistics for the user with the specified ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Statistics successfully received",
+                    content = @Content(schema = @Schema(implementation = UserReviewStats.class))),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public UserReviewStats getUserReviewsStats(
+            @PathVariable @Parameter(description = "User ID") Long authorId) {
         log.info("Requesting reviews stats for user with id '{}'", authorId);
         return statsService.getUserReviewsStats(authorId);
     }
