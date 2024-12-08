@@ -13,12 +13,12 @@ public record ReviewUpdateRequest(
 
         @Schema(description = "Title of the review", example = "Updated Review Title")
         @Size(min = 2, max = 100, message = "Title can not be blank and must contain between 2 and 100 symbols.")
-        @Pattern(regexp = "^[a-zA-Zа-яА-ЯёЁ -.,!?]+$", message = "Title can not be blank and must contain between 2 and 100 symbols.")
+        @Pattern(regexp = "^[a-zA-zа-яА-ЯёЁ -.,!?]+$", message = "Title can not be blank and must contain between 2 and 100 symbols.")
         String title,
 
         @Schema(description = "Content of the review", example = "The updated review content with more details.")
         @Size(min = 2, max = 500, message = "Content can not be blank and must contain between 2 and 500 symbols.")
-        @Pattern(regexp = "^[a-zA-Zа-яА-ЯёЁ -.,!?]+$", message = "Content can not be blank and must contain between 2 and 500 symbols.")
+        @Pattern(regexp = "^[a-zA-zа-яА-ЯёЁ -.,!?]+$", message = "Content can not be blank and must contain between 2 and 500 symbols.")
         String content,
 
         @Schema(description = "Username of the reviewer", example = "user_123")

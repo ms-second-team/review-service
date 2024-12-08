@@ -36,6 +36,7 @@ import java.util.Map;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -145,7 +146,7 @@ class ReviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newReview)))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MissingRequestHeaderException))
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())));
 
         verify(reviewMapper, never()).toModel(any());
@@ -169,10 +170,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 " +
-                        "and 100 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 and 100 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -195,10 +195,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 " +
-                        "and 100 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 and 100 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -221,7 +220,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 " +
                         "and 100 symbols.")));
@@ -247,10 +246,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 " +
-                        "and 100 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 and 100 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -273,10 +271,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 " +
-                        "and 500 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 and 500 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -299,10 +296,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 " +
-                        "and 500 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 and 500 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -325,10 +321,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 " +
-                        "and 500 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 and 500 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -351,10 +346,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 " +
-                        "and 500 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 and 500 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -377,10 +371,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 " +
-                        "and 30 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 and 30 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -403,10 +396,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 " +
-                        "and 30 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 and 30 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -429,10 +421,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 " +
-                        "and 30 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 and 30 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -455,10 +446,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 " +
-                        "and 30 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 and 30 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -481,7 +471,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Mark must be between '1' and '10'")));
 
@@ -506,7 +496,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Mark must be between '1' and '10'")));
 
@@ -531,7 +521,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Mark must be between '1' and '10'")));
 
@@ -556,7 +546,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Mark must be between '1' and '10'")));
 
@@ -581,7 +571,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Event id must be positive")));
 
@@ -606,7 +596,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Event id must be positive")));
 
@@ -631,7 +621,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Event id must be positive")));
 
@@ -830,7 +820,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(updateRequest))
                         .header("X-User-Id", userId))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+                .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.errors", hasValue("Review was not found")));
 
 
@@ -853,7 +843,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(updateRequest))
                         .header("X-User-Id", userId))
                 .andExpect(status().isForbidden())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotAuthorizedException))
+                .andExpect(result -> assertInstanceOf(NotAuthorizedException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.errors", hasValue("Not authorized")));
 
 
@@ -899,7 +889,7 @@ class ReviewControllerTest {
         mvc.perform(get("/reviews/{reviewId}", reviewId)
                         .header("X-User-Id", userId))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+                .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.errors", hasValue("Review was not found")));
 
         verify(reviewService, times(1)).findReviewById(reviewId, userId);

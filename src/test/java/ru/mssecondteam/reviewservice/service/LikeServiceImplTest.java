@@ -1,5 +1,10 @@
 package ru.mssecondteam.reviewservice.service;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,15 +20,24 @@ import ru.mssecondteam.reviewservice.service.like.LikeService;
 import java.util.ArrayList;
 import java.util.Map;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Testcontainers
+@WireMockTest
 class LikeServiceImplTest {
     @Container
     @ServiceConnection
@@ -34,6 +48,47 @@ class LikeServiceImplTest {
 
     @Autowired
     private LikeService likeService;
+
+    static WireMockServer registrationServer;
+    static WireMockServer eventServer;
+
+    @BeforeAll
+    static void setupWireMock() {
+        registrationServer = new WireMockServer(WireMockConfiguration.options().port(8090));
+        eventServer = new WireMockServer(WireMockConfiguration.options().port(8070));
+        registrationServer.start();
+        eventServer.start();
+        // Setup WireMock for RegistrationClient
+        configureFor("localhost", 8090);
+        stubFor(get(urlPathMatching("/registrations"))
+                .withQueryParam("page", matching("\\d+"))
+                .withQueryParam("size", matching("\\d+"))
+                .withQueryParam("eventId", matching("\\d+"))
+                .willReturn(aResponse()
+                        .withStatus(OK.value())
+                        .withHeader("Content-Type", APPLICATION_JSON_VALUE)
+                        .withBody("[{\"id\": 1, \"eventId\": 4, \"username\": \"username\", \"status\": \"APPROVED\"}]")));
+
+        // Setup WireMock for EventClient
+        configureFor("localhost", 8070);
+        stubFor(get(urlPathMatching("/events/\\d+"))
+                .willReturn(aResponse()
+                        .withStatus(OK.value())
+                        .withHeader("Content-Type", APPLICATION_JSON_VALUE)
+                        .withBody("{\"id\": 4, \"ownerId\": 2, \"endDateTime\": \"2024-12-31 23:59:59\"}")));
+
+        stubFor(get(urlPathMatching("/events/teams/\\d+"))
+                .willReturn(aResponse()
+                        .withStatus(OK.value())
+                        .withHeader("Content-Type", APPLICATION_JSON_VALUE)
+                        .withBody("[{\"userId\": 1}, {\"userId\": 3}]")));
+    }
+
+    @AfterAll
+    static void tearDownWireMock() {
+        if (registrationServer != null) registrationServer.stop();
+        if (eventServer != null) eventServer.stop();
+    }
 
     @Test
     void addLike() {

@@ -41,7 +41,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public Review createReview(Review review, Long userId) {
         review.setAuthorId(userId);
-        eventServiceHelper.checkThatEventHasPassedAndUserIsEventTeamMembers(review.getAuthorId(), review.getId());
+        eventServiceHelper.checkThatEventHasPassedAndUserIsEventTeamMembers(review.getAuthorId(), review.getEventId());
         registrationServiceHelper.checkUserApprovedForEvent(review.getEventId(), review.getUsername());
         final Review savedReview = reviewRepository.save(review);
         log.info("Review with id '{}' was created", savedReview.getId());
