@@ -11,7 +11,7 @@ import ru.mssecondteam.reviewservice.dto.event.TeamMemberDto;
 
 import java.util.List;
 
-@FeignClient(name = "eventClient", url = "${event-service.url}", configuration = EventClientConfig.class)
+@FeignClient(name = "eventClient", url = "${app.event-service.url}", configuration = EventClientConfig.class)
 public interface EventClient {
     @GetMapping("/events/{eventId}")
     ResponseEntity<EventDto> getEventById(@RequestHeader("X-User-Id") Long userId, @PathVariable Long eventId);

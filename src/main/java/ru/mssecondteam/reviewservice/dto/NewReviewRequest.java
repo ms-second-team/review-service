@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
-@Schema(description = "DTO for creating a new review")
+@Schema(description = "Creating a new review")
 public record NewReviewRequest(
 
         @NotBlank(message = "Title can not be blank and must contain between 2 and 100 symbols.")

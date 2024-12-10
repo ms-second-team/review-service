@@ -20,7 +20,7 @@ public class EventServiceHelper {
 
     public void checkThatEventHasPassedAndUserIsEventTeamMembers(Long userId, Long eventId) {
         final EventDto event = eventClient.getEventById(userId, eventId).getBody();
-        if (event.endDateTime().isBefore(LocalDateTime.now())) {
+        if (event.endDateTime().isAfter(LocalDateTime.now())) {
             throw new ValidationException(String.format("The event with id = %d has not yet passed", eventId));
         }
         final Set<Long> eventTeamMembersId = eventClient.getTeamsByEventId(userId, eventId).getBody().stream()

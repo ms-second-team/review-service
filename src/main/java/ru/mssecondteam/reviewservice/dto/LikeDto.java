@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-@Schema(description = "DTO representing likes and dislikes for a review")
+@Schema(description = "Representing likes and dislikes for a review")
 public record LikeDto(
 
         @Schema(description = "The ID of the review", example = "10")

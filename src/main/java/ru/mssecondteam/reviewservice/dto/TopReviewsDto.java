@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-@Schema(description = "DTO representing the top reviews with the best and worst reviews.")
+@Schema(description = "Best and worst reviews.")
 public record TopReviewsDto(
 
         @Schema(description = "List of the best reviews.", example = "[{\"id\": 1, \"title\": \"Excellent product!\", \"content\": \"I loved it.\", \"username\": \"user123\", \"mark\": 10, \"eventId\": 101}]")

@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
-@Schema(description = "Request DTO for updating an existing review")
+@Schema(description = "Updating an existing review")
 public record ReviewUpdateRequest(
 
         @Schema(description = "Title of the review", example = "Updated Review Title")

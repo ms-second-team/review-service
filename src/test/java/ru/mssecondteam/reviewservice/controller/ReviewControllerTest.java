@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import ru.mssecondteam.reviewservice.Constants;
 import ru.mssecondteam.reviewservice.dto.EventReviewStats;
 import ru.mssecondteam.reviewservice.dto.LikeDto;
 import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
@@ -37,7 +38,6 @@ import static java.time.format.DateTimeFormatter.ofPattern;
 import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
@@ -85,11 +85,11 @@ class ReviewControllerTest {
 
     private Long reviewId;
 
-    @Value("${spring.jackson.date-format}")
     private String dateTimeFormat;
 
     @BeforeEach
     void init() {
+        dateTimeFormat = Constants.DATA_PATTERN;
         newReview = NewReviewRequest.builder()
                 .title("new title")
                 .content("new content")

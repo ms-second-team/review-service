@@ -47,7 +47,7 @@ import static ru.mssecondteam.reviewservice.mapper.ReviewMapper.getReviewsIds;
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Reviews API", description = "API for feedback management")
+@Tag(name = "Reviews API", description = "API for review management")
 public class ReviewController {
 
     private final ReviewService reviewService;
@@ -61,10 +61,11 @@ public class ReviewController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Review successfully created",
                     content = @Content(schema = @Schema(implementation = ReviewDto.class))),
-            @ApiResponse(responseCode = "400", description = "Incorrect data")
+            @ApiResponse(responseCode = "400", description = "Incorrect data"),
+            @ApiResponse(responseCode = "500", description = "Unknown error")
     })
     public ReviewDto createReview(
-            @RequestBody @Valid NewReviewRequest newReview,
+            @RequestBody @Valid @Parameter(description = "New review") NewReviewRequest newReview,
             @RequestHeader("X-User-Id") @Parameter(description = "ID of the user creating the review") Long userId) {
         log.info("User with id '{}' publishing review for event with id '{}", userId, newReview.eventId());
         final Review review = reviewMapper.toModel(newReview);
@@ -77,12 +78,14 @@ public class ReviewController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "The review has been successfully updated",
                     content = @Content(schema = @Schema(implementation = ReviewDto.class))),
-            @ApiResponse(responseCode = "404", description = "Feedback not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid query parameters")
+            @ApiResponse(responseCode = "404", description = "Review not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameters"),
+            @ApiResponse(responseCode = "403", description = "User is not authorized to modify review"),
+            @ApiResponse(responseCode = "500", description = "Unknown error")
     })
     public ReviewDto updateReview(
             @PathVariable @Parameter(description = "Review ID to update") Long reviewId,
-            @RequestBody @Valid ReviewUpdateRequest updateRequest,
+            @RequestBody @Valid @Parameter(description = "New review") ReviewUpdateRequest updateRequest,
             @RequestHeader("X-User-Id") @Parameter(description = "User ID of the user updating the review") Long userId) {
         log.info("User with id '{}' updating review with id '{}'", userId, reviewId);
         final Review updatedReview = reviewService.updateReview(reviewId, updateRequest, userId);
@@ -95,7 +98,8 @@ public class ReviewController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Review found",
                     content = @Content(schema = @Schema(implementation = ReviewDto.class))),
-            @ApiResponse(responseCode = "404", description = "Review not found")
+            @ApiResponse(responseCode = "404", description = "Review not found"),
+            @ApiResponse(responseCode = "500", description = "Unknown error")
     })
     public ReviewDto findReviewById(
             @PathVariable @Parameter(description = "Review ID") Long reviewId,
@@ -111,7 +115,8 @@ public class ReviewController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reviews successfully received",
                     content = @Content(schema = @Schema(implementation = ReviewDto.class))),
-            @ApiResponse(responseCode = "400", description = "Incorrect data")
+            @ApiResponse(responseCode = "400", description = "Incorrect data"),
+            @ApiResponse(responseCode = "500", description = "Unknown error")
     })
     public List<ReviewDto> findReviewsByEventId(
             @RequestParam @Parameter(description = "Review ID") Long eventId,
@@ -130,7 +135,9 @@ public class ReviewController {
     @Operation(summary = "Delete review", description = "Deletes a review by ID")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Review successfully deleted"),
-            @ApiResponse(responseCode = "404", description = "Review not found")
+            @ApiResponse(responseCode = "403", description = "User is not authorized to delete review"),
+            @ApiResponse(responseCode = "404", description = "Review not found"),
+            @ApiResponse(responseCode = "500", description = "Unknown error")
     })
     public void deleteReviewById(
             @PathVariable @Parameter(description = "Review ID for deletion") Long reviewId,
@@ -145,7 +152,9 @@ public class ReviewController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Like was added",
                     content = @Content(schema = @Schema(implementation = ReviewDto.class))),
-            @ApiResponse(responseCode = "404", description = "Review not found")
+            @ApiResponse(responseCode = "403", description = "User is not authorized to add like to review"),
+            @ApiResponse(responseCode = "404", description = "Review not found"),
+            @ApiResponse(responseCode = "500", description = "Unknown error")
     })
     public ReviewDto addLike(
             @PathVariable @Parameter(description = "Review ID") Long reviewId,
@@ -162,7 +171,9 @@ public class ReviewController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Like was deleted",
                     content = @Content(schema = @Schema(implementation = ReviewDto.class))),
-            @ApiResponse(responseCode = "404", description = "Review not found")
+            @ApiResponse(responseCode = "403", description = "User is not authorized to delete like to review"),
+            @ApiResponse(responseCode = "404", description = "Review not found"),
+            @ApiResponse(responseCode = "500", description = "Unknown error")
     })
     public ReviewDto deleteLike(
             @PathVariable @Parameter(description = "Review ID") Long reviewId,
@@ -179,7 +190,9 @@ public class ReviewController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Dislike was added",
                     content = @Content(schema = @Schema(implementation = ReviewDto.class))),
-            @ApiResponse(responseCode = "404", description = "Review not found")
+            @ApiResponse(responseCode = "403", description = "User is not authorized to add dislike to review"),
+            @ApiResponse(responseCode = "404", description = "Review not found"),
+            @ApiResponse(responseCode = "500", description = "Unknown error")
     })
     public ReviewDto addDislike(
             @PathVariable @Parameter(description = "Review ID") Long reviewId,
@@ -196,7 +209,9 @@ public class ReviewController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Dislike was deleted",
                     content = @Content(schema = @Schema(implementation = ReviewDto.class))),
-            @ApiResponse(responseCode = "404", description = "Review not found")
+            @ApiResponse(responseCode = "403", description = "User is not authorized to delete dislike to review"),
+            @ApiResponse(responseCode = "404", description = "Review not found"),
+            @ApiResponse(responseCode = "500", description = "Unknown error")
     })
     public ReviewDto deleteDislike(
             @PathVariable @Parameter(description = "Review ID") Long reviewId,
@@ -212,7 +227,8 @@ public class ReviewController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Top reviews have been successfully received",
                     content = @Content(schema = @Schema(implementation = TopReviewsDto.class))),
-            @ApiResponse(responseCode = "404", description = "Review not found")
+            @ApiResponse(responseCode = "404", description = "Review not found"),
+            @ApiResponse(responseCode = "500", description = "Unknown error")
     })
     public TopReviewsDto getTopReviewsForEvent(
             @RequestParam @Parameter(description = "Review ID") Long eventId) {
@@ -226,7 +242,8 @@ public class ReviewController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Statistics successfully received",
                     content = @Content(schema = @Schema(implementation = EventReviewStats.class))),
-            @ApiResponse(responseCode = "404", description = "Review not found")
+            @ApiResponse(responseCode = "404", description = "Review not found"),
+            @ApiResponse(responseCode = "500", description = "Unknown error")
     })
     public EventReviewStats getEventReviewsStats(
             @PathVariable @Parameter(description = "Review ID") Long eventId) {
@@ -239,7 +256,8 @@ public class ReviewController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Statistics successfully received",
                     content = @Content(schema = @Schema(implementation = UserReviewStats.class))),
-            @ApiResponse(responseCode = "404", description = "User not found")
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Unknown error")
     })
     public UserReviewStats getUserReviewsStats(
             @PathVariable @Parameter(description = "User ID") Long authorId) {

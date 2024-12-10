@@ -91,6 +91,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public Review deleteLikeOrDislike(Long reviewId, Long userId, Boolean isPositive) {
         final Review review = getReviewById(reviewId);
+        checkIfUserIsNotAuthor(review, userId);
         likeService.deleteLikeOrDislike(reviewId, userId, isPositive);
         log.info("User with id '{}' delete like to review with id '{}'", userId, review.getId());
         return review;

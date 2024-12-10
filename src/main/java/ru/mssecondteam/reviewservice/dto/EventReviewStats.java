@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-@Schema(description = "DTO representing statistics for reviews of an event.")
+@Schema(description = "Representing statistics for reviews of an event.")
 public record EventReviewStats(
 
         @Schema(description = "Unique identifier of the event.", example = "67890")

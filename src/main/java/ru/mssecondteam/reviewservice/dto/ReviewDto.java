@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import static ru.mssecondteam.reviewservice.Constants.DATA_PATTERN;
 
 @Builder
-@Schema(description = "DTO representing a review entity")
+@Schema(description = "Representing a review entity")
 public record ReviewDto(
 
         @Schema(description = "Unique identifier of the review", example = "1")
