@@ -1,17 +1,19 @@
 package ru.mssecondteam.reviewservice.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -31,13 +33,11 @@ import java.util.List;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -49,11 +49,15 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Testcontainers
-@WireMockTest
+@AutoConfigureWireMock(port = 0)
+@TestPropertySource(properties = {
+        "app.event-service.url=http://localhost:${wiremock.server.port}",
+        "app.registration-service.url=http://localhost:${wiremock.server.port}"
+})
 class LikeServiceImplTest {
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+    private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
 
     @Autowired
     private ReviewService reviewService;
@@ -61,88 +65,35 @@ class LikeServiceImplTest {
     @Autowired
     private LikeService likeService;
 
-    static WireMockServer registrationServer;
-    static WireMockServer eventServer;
+    private ObjectMapper objectMapper;
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
+    }
 
     @BeforeAll
-    static void setupWireMock() throws JsonProcessingException {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-
-        registrationServer = new WireMockServer(wireMockConfig().dynamicPort());
-        eventServer = new WireMockServer(wireMockConfig().dynamicPort());
-
-        registrationServer.start();
-        eventServer.start();
-
-        int registrationPort = registrationServer.port();
-        int eventPort = eventServer.port();
-
-        System.setProperty("app.registration-service.url", "http://localhost:" + registrationPort);
-        System.setProperty("app.event-service.url", "http://localhost:" + eventPort);
-
-        // Setup WireMock for RegistrationClient
-        List<RegistrationResponseDto> searchRegistrationsResponse = List.of(
-                new RegistrationResponseDto(
-                        "username",
-                        "user@name.mail",
-                        "7777777777",
-                        4L,
-                        RegistrationStatus.APPROVED)
-        );
-
-        String searchRegistrationsResponseBody = objectMapper.writeValueAsString(searchRegistrationsResponse);
-
-        configureFor("localhost", registrationPort);
-        stubFor(get(urlPathMatching("/registrations/search"))
-                .withQueryParam("statuses", equalTo("APPROVED"))
-                .withQueryParam("eventId", matching("\\d+"))
-                .willReturn(aResponse()
-                        .withStatus(OK.value())
-                        .withHeader("Content-Type", APPLICATION_JSON_VALUE)
-                        .withBody(searchRegistrationsResponseBody)));
-
-        // Setup WireMock for EventClient
-        EventDto getEventByIdResponse = new EventDto(
-                4L,
-                "username",
-                "description",
-                LocalDateTime.now().minusDays(20),
-                LocalDateTime.now().minusDays(10),
-                LocalDateTime.now().minusDays(5),
-                "stadium",
-                2L);
-
-        List<TeamMemberDto> getTeamsByEventIdResponse = List.of(
-                new TeamMemberDto(4L, 1L, TeamMemberRole.MEMBER));
-
-        String getEventByIdResponseBody = objectMapper.writeValueAsString(getEventByIdResponse);
-        String getTeamsByEventIdResponseBody = objectMapper.writeValueAsString(getTeamsByEventIdResponse);
-
-        configureFor("localhost", eventPort);
-        stubFor(get(urlPathMatching("/events/\\d+"))
-                .willReturn(aResponse()
-                        .withStatus(OK.value())
-                        .withHeader("Content-Type", APPLICATION_JSON_VALUE)
-                        .withBody(getEventByIdResponseBody)));
-
-        stubFor(get(urlPathMatching("/events/teams/\\d+"))
-                .willReturn(aResponse()
-                        .withStatus(OK.value())
-                        .withHeader("Content-Type", APPLICATION_JSON_VALUE)
-                        .withBody(getTeamsByEventIdResponseBody)));
+    static void beforeAll() {
+        POSTGRES.start();
     }
 
     @AfterAll
-    static void tearDownWireMock() {
-        if (registrationServer != null) registrationServer.stop();
-        if (eventServer != null) eventServer.stop();
+    static void afterAll() {
+        POSTGRES.stop();
+    }
+
+    @BeforeEach
+    void setUp() {
+        objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule());
     }
 
     @Test
     void addLike() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserId = 2L;
@@ -159,6 +110,8 @@ class LikeServiceImplTest {
 
     @Test
     void addDoubleLike() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserId = 2L;
@@ -176,6 +129,9 @@ class LikeServiceImplTest {
 
     @Test
     void addLikeIfExistDislike() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
+
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserId = 2L;
@@ -195,6 +151,8 @@ class LikeServiceImplTest {
 
     @Test
     void addDislike() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserId = 2L;
@@ -211,6 +169,8 @@ class LikeServiceImplTest {
 
     @Test
     void addDoubleDislike() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserId = 2L;
@@ -228,6 +188,8 @@ class LikeServiceImplTest {
 
     @Test
     void addDislikeIfExistLike() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserId = 2L;
@@ -244,6 +206,8 @@ class LikeServiceImplTest {
 
     @Test
     void deleteLike() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserId = 2L;
@@ -259,6 +223,8 @@ class LikeServiceImplTest {
 
     @Test
     void deleteDislike() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserId = 2L;
@@ -274,6 +240,8 @@ class LikeServiceImplTest {
 
     @Test
     void deleteNotExistLike() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserId = 2L;
@@ -288,6 +256,8 @@ class LikeServiceImplTest {
 
     @Test
     void deleteNotExistDislike() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserId = 2L;
@@ -302,6 +272,8 @@ class LikeServiceImplTest {
 
     @Test
     void deleteLikeIfExistDislike() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserId = 2L;
@@ -320,6 +292,8 @@ class LikeServiceImplTest {
 
     @Test
     void deleteDislikeIfExistLike() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserId = 2L;
@@ -338,6 +312,8 @@ class LikeServiceImplTest {
 
     @Test
     void getNumberOfLikesAndDislikesByReviewId() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserIdNumberOne = 2L;
@@ -357,6 +333,8 @@ class LikeServiceImplTest {
 
     @Test
     void getNumberOfLikesAndDislikesByReviewIdIfLikesDoNotExist() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserIdNumberOne = 2L;
@@ -376,6 +354,8 @@ class LikeServiceImplTest {
 
     @Test
     void getNumberOfLikesAndDislikesByReviewIdIfDislikesDoNotExist() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
         Long otherUserIdNumberOne = 2L;
@@ -395,6 +375,8 @@ class LikeServiceImplTest {
 
     @Test
     void getNumberOfLikesAndDislikesByReviewIdIfLikesAndDislikesDoNotExist() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReview = createReview(1);
         Long userId = 1L;
 
@@ -407,6 +389,8 @@ class LikeServiceImplTest {
 
     @Test
     void getNumberOfLikesAndDislikesByListReviewsId() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReviewNumberOne = createReview(1);
         Review newReviewNumberTwo = createReview(2);
         Long userId = 1L;
@@ -434,6 +418,8 @@ class LikeServiceImplTest {
 
     @Test
     void getNumberOfLikesAndDislikesByListReviewsIdIfOneReviewHasNoLikesOrDislikes() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReviewNumberOne = createReview(1);
         Review newReviewNumberTwo = createReview(2);
         Review newReviewNumberThree = createReview(3);
@@ -464,6 +450,8 @@ class LikeServiceImplTest {
 
     @Test
     void getNumberOfLikesAndDislikesByListReviewsIdIfLikesAndDislikesDoNotExist() {
+        setupWireMockForRegistrationClientPositiveAnswer();
+        setupWireMockForEventClientPositiveAnswer();
         Review newReviewNumberOne = createReview(1);
         Review newReviewNumberTwo = createReview(2);
         Long userId = 1L;
@@ -490,4 +478,50 @@ class LikeServiceImplTest {
                 .build();
     }
 
+    @SneakyThrows
+    private void setupWireMockForRegistrationClientPositiveAnswer() {
+        List<RegistrationResponseDto> searchRegistrationsResponse = List.of(
+                new RegistrationResponseDto(
+                        "username",
+                        "user@name.mail",
+                        "7777777777",
+                        4L,
+                        RegistrationStatus.APPROVED)
+        );
+        stubFor(get(urlPathMatching("/registrations/search"))
+                .withQueryParam("statuses", equalTo("APPROVED"))
+                .withQueryParam("eventId", matching("\\d+"))
+                .willReturn(aResponse()
+                        .withStatus(OK.value())
+                        .withHeader("Content-Type", APPLICATION_JSON_VALUE)
+                        .withBody(objectMapper.writeValueAsString(searchRegistrationsResponse))));
+    }
+
+    @SneakyThrows
+    private void setupWireMockForEventClientPositiveAnswer() {
+        EventDto getEventByIdResponse = new EventDto(
+                4L,
+                "username",
+                "description",
+                LocalDateTime.now().minusDays(20),
+                LocalDateTime.now().minusDays(10),
+                LocalDateTime.now().minusDays(5),
+                "stadium",
+                2L);
+
+        List<TeamMemberDto> getTeamsByEventIdResponse = List.of(
+                new TeamMemberDto(4L, 1L, TeamMemberRole.MEMBER));
+
+        stubFor(get(urlPathMatching("/events/\\d+"))
+                .willReturn(aResponse()
+                        .withStatus(OK.value())
+                        .withHeader("Content-Type", APPLICATION_JSON_VALUE)
+                        .withBody(objectMapper.writeValueAsString(getEventByIdResponse))));
+
+        stubFor(get(urlPathMatching("/events/teams/\\d+"))
+                .willReturn(aResponse()
+                        .withStatus(OK.value())
+                        .withHeader("Content-Type", APPLICATION_JSON_VALUE)
+                        .withBody(objectMapper.writeValueAsString(getTeamsByEventIdResponse))));
+    }
 }
