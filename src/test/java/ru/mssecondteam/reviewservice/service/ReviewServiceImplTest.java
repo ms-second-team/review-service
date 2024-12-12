@@ -600,7 +600,7 @@ class ReviewServiceImplTest {
 
     @Test
     @DisplayName("Check event has passed and user is event team member, event not passed")
-    void checkThatEventHasPassedAndUserIsEventTeamMember_whenEventNotPassed_shouldThrowValidationException() {
+    void createReview_whenEventNotPassed_shouldThrowValidationException() {
         setupWireMockForEventClientNegativeAnswerForNotPassedEvent();
         Long userId = 2L;
         Long eventId = 4L;
@@ -614,7 +614,7 @@ class ReviewServiceImplTest {
 
     @Test
     @DisplayName("Check event has passed and user is event team member, user not team member")
-    void checkThatEventHasPassedAndUserIsEventTeamMember_whenUserNotTeamMember_shouldThrowNotAuthorizedException() {
+    void createReview_whenUserNotTeamMember_shouldThrowNotAuthorizedException() {
         setupWireMockForEventClientNegativeAnswerForUserNotTeamMember();
         Long userId = 999L;
         Long eventId = 4L;
@@ -628,8 +628,8 @@ class ReviewServiceImplTest {
     }
 
     @Test
-    @DisplayName("Check user approved for event")
-    void checkUserApprovedForEvent_whenUserIsApproved_shouldNotThrowException() {
+    @DisplayName("Check user approved for event adn event passed")
+    void createReview_whenUserIsApprovedForPassedEvent_shouldNotThrowException() {
         setupWireMockForRegistrationClientPositiveAnswer();
         setupWireMockForEventClientPositiveAnswer();
         Long eventId = 4L;
@@ -641,7 +641,7 @@ class ReviewServiceImplTest {
 
     @Test
     @DisplayName("Check user approved for event, user not approved")
-    void checkUserApprovedForEvent_whenUserNotApproved_shouldThrowValidationException() {
+    void createReview_whenUserNotApproved_shouldThrowValidationException() {
         setupWireMockForRegistrationClientNegativeAnswerForUserNotApproved();
         Long userId = 2L;
         Long eventId = 4L;

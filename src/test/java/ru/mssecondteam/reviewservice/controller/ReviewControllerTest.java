@@ -1,6 +1,7 @@
 package ru.mssecondteam.reviewservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
-import ru.mssecondteam.reviewservice.Constants;
 import ru.mssecondteam.reviewservice.dto.EventReviewStats;
 import ru.mssecondteam.reviewservice.dto.LikeDto;
 import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
@@ -33,7 +33,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 
-import static java.time.format.DateTimeFormatter.ofPattern;
 import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -88,7 +87,8 @@ class ReviewControllerTest {
 
     @BeforeEach
     void init() {
-        dateTimeFormat = Constants.DATA_PATTERN;
+        objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule());
         newReview = NewReviewRequest.builder()
                 .title("new title")
                 .content("new content")
@@ -126,10 +126,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewMapper, times(1)).toModel(newReview);
@@ -655,10 +653,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
@@ -691,10 +687,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
@@ -726,10 +720,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
@@ -760,10 +752,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
@@ -793,10 +783,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
@@ -867,10 +855,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).findReviewById(reviewId, userId);
@@ -913,10 +899,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.[0].id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.[0].title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.[0].content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.[0].createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.[0].updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.[0].createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.[0].updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.[0].mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).findReviewsByEventId(eventId, 0, 10, userId);
@@ -987,10 +971,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).addLikeOrDislike(anyLong(), anyLong(), any());
@@ -1047,10 +1029,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).addLikeOrDislike(anyLong(), anyLong(), any());
@@ -1107,10 +1087,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).deleteLikeOrDislike(anyLong(), anyLong(), any());
@@ -1152,10 +1130,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).deleteLikeOrDislike(anyLong(), anyLong(), any());

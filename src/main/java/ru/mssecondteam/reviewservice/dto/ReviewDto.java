@@ -1,12 +1,9 @@
 package ru.mssecondteam.reviewservice.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
-
-import static ru.mssecondteam.reviewservice.Constants.DATA_PATTERN;
 
 @Builder
 @Schema(description = "Representing a review entity")
@@ -30,11 +27,9 @@ public record ReviewDto(
         @Schema(description = "ID of the associated event", example = "456")
         Long eventId,
 
-        @JsonFormat(pattern = DATA_PATTERN)
         @Schema(description = "Timestamp when the review was created", example = "2024-11-27 10:15:30")
         LocalDateTime createdDateTime,
 
-        @JsonFormat(pattern = DATA_PATTERN)
         @Schema(description = "Timestamp when the review was last updated", example = "2024-11-27 12:45:00")
         LocalDateTime updatedDateTime,
 
