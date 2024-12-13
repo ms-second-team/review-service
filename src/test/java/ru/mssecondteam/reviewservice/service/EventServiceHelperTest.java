@@ -34,7 +34,7 @@ class EventServiceHelperTest {
 
     @Test
     @DisplayName("Should successfully validate when event has passed and user is a team member")
-    void shouldValidateEventAndUserSuccessfully() {
+    void checkThatEventHasPassedAndUserIsEventTeamMembers_whenEventPassedAndUserInTeam_shouldThrowValidationException() {
         Long userId = 1L;
         Long eventId = 100L;
 
@@ -60,7 +60,7 @@ class EventServiceHelperTest {
 
     @Test
     @DisplayName("Should throw ValidationException when event has not yet passed")
-    void shouldThrowValidationExceptionWhenEventNotPassed() {
+    void checkThatEventHasPassedAndUserIsEventTeamMembers_whenEventNotPassed_shouldThrowValidationException() {
         Long userId = 1L;
         Long eventId = 100L;
 
@@ -83,7 +83,7 @@ class EventServiceHelperTest {
 
     @Test
     @DisplayName("Should throw NotAuthorizedException when user is not a team member")
-    void shouldThrowNotAuthorizedExceptionWhenUserNotTeamMember() {
+    void checkThatEventHasPassedAndUserIsEventTeamMembers_whenUserNotTeamMember_shouldThrowNotAuthorizedException() {
         Long userId = 1L;
         Long eventId = 100L;
 
@@ -112,7 +112,7 @@ class EventServiceHelperTest {
 
     @Test
     @DisplayName("Should throw NotFoundException when event is not found")
-    void shouldThrowNotFoundExceptionWhenEventNotFound() {
+    void checkThatEventHasPassedAndUserIsEventTeamMembers_whenEventNotFound_shouldThrowNotFoundException() {
         Long userId = 1L;
         Long eventId = 100L;
 

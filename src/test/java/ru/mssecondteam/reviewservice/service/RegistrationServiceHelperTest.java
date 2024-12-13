@@ -37,7 +37,7 @@ class RegistrationServiceHelperTest {
 
     @Test
     @DisplayName("Should successfully validate when user is approved for the event")
-    void shouldValidateApprovedUserForEvent() {
+    void checkUserApprovedForEvent_whenUserApprovedToEvent_shouldThrowValidationException() {
         Long eventId = 1L;
         String userName = "approvedUser";
 
@@ -55,7 +55,7 @@ class RegistrationServiceHelperTest {
 
     @Test
     @DisplayName("Should throw ValidationException when no registrations are found for the event")
-    void shouldThrowValidationExceptionWhenNoRegistrationsFound() {
+    void checkUserApprovedForEvent_whenNoRegistrationsFound_shouldThrowValidationException() {
         Long eventId = 1L;
         String userName = "nonExistentUser";
 
@@ -70,7 +70,7 @@ class RegistrationServiceHelperTest {
 
     @Test
     @DisplayName("Should throw ValidationException when user is not in the approved registrations")
-    void shouldThrowValidationExceptionWhenUserNotApproved() {
+    void checkUserApprovedForEvent_whenUserNotApproved_shouldThrowValidationException() {
         Long eventId = 1L;
         String userName = "nonApprovedUser";
 
@@ -89,7 +89,7 @@ class RegistrationServiceHelperTest {
 
     @Test
     @DisplayName("Should handle empty response body and throw ValidationException")
-    void shouldHandleEmptyResponseBody() {
+    void checkUserApprovedForEvent_whenReturnEmptyList_shouldThrowValidationException() {
         Long eventId = 1L;
         String userName = "user";
 
@@ -104,7 +104,7 @@ class RegistrationServiceHelperTest {
 
     @Test
     @DisplayName("Should throw exception when RegistrationClient returns 404")
-    void shouldThrowNotFoundExceptionWhenClientReturns404() {
+    void checkUserApprovedForEvent_whenRegistrationClientReturn404_shouldThrowNotFoundException() {
         Long eventId = 1L;
         String userName = "user";
 
@@ -119,7 +119,7 @@ class RegistrationServiceHelperTest {
 
     @Test
     @DisplayName("Should throw exception for unexpected errors from RegistrationClient")
-    void shouldThrowExceptionForUnexpectedErrors() {
+    void checkUserApprovedForEvent_whenUnexpectedErrors_shouldThrowException() {
         Long eventId = 1L;
         String userName = "user";
 
