@@ -1,12 +1,12 @@
 package ru.mssecondteam.reviewservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -33,10 +33,9 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 
-import static java.time.format.DateTimeFormatter.ofPattern;
 import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
@@ -84,11 +83,12 @@ class ReviewControllerTest {
 
     private Long reviewId;
 
-    @Value("${spring.jackson.date-format}")
     private String dateTimeFormat;
 
     @BeforeEach
     void init() {
+        objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule());
         newReview = NewReviewRequest.builder()
                 .title("new title")
                 .content("new content")
@@ -126,10 +126,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewMapper, times(1)).toModel(newReview);
@@ -145,7 +143,7 @@ class ReviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newReview)))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MissingRequestHeaderException))
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())));
 
         verify(reviewMapper, never()).toModel(any());
@@ -169,10 +167,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 " +
-                        "and 100 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 and 100 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -195,10 +192,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 " +
-                        "and 100 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 and 100 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -221,7 +217,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 " +
                         "and 100 symbols.")));
@@ -247,10 +243,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 " +
-                        "and 100 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 and 100 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -273,10 +268,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 " +
-                        "and 500 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 and 500 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -299,10 +293,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 " +
-                        "and 500 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 and 500 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -325,10 +318,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 " +
-                        "and 500 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 and 500 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -351,10 +343,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 " +
-                        "and 500 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Content can not be blank and must contain between 2 and 500 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -377,10 +368,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 " +
-                        "and 30 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 and 30 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -403,10 +393,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 " +
-                        "and 30 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 and 30 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -429,10 +418,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 " +
-                        "and 30 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 and 30 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -455,10 +443,9 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
-                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 " +
-                        "and 30 symbols.")));
+                .andExpect(jsonPath("$.errors", hasValue("Username can not be blank and must contain between 2 and 30 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -481,7 +468,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Mark must be between '1' and '10'")));
 
@@ -506,7 +493,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Mark must be between '1' and '10'")));
 
@@ -531,7 +518,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Mark must be between '1' and '10'")));
 
@@ -556,7 +543,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Mark must be between '1' and '10'")));
 
@@ -581,7 +568,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Event id must be positive")));
 
@@ -606,7 +593,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Event id must be positive")));
 
@@ -631,7 +618,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(newReview))
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Event id must be positive")));
 
@@ -666,10 +653,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
@@ -702,10 +687,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
@@ -737,10 +720,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
@@ -771,10 +752,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
@@ -804,10 +783,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
@@ -830,7 +807,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(updateRequest))
                         .header("X-User-Id", userId))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+                .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.errors", hasValue("Review was not found")));
 
 
@@ -853,7 +830,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(updateRequest))
                         .header("X-User-Id", userId))
                 .andExpect(status().isForbidden())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotAuthorizedException))
+                .andExpect(result -> assertInstanceOf(NotAuthorizedException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.errors", hasValue("Not authorized")));
 
 
@@ -878,10 +855,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).findReviewById(reviewId, userId);
@@ -899,7 +874,7 @@ class ReviewControllerTest {
         mvc.perform(get("/reviews/{reviewId}", reviewId)
                         .header("X-User-Id", userId))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+                .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.errors", hasValue("Review was not found")));
 
         verify(reviewService, times(1)).findReviewById(reviewId, userId);
@@ -924,10 +899,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.[0].id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.[0].title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.[0].content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.[0].createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.[0].updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.[0].createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.[0].updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.[0].mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).findReviewsByEventId(eventId, 0, 10, userId);
@@ -998,10 +971,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).addLikeOrDislike(anyLong(), anyLong(), any());
@@ -1058,10 +1029,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).addLikeOrDislike(anyLong(), anyLong(), any());
@@ -1118,10 +1087,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).deleteLikeOrDislike(anyLong(), anyLong(), any());
@@ -1163,10 +1130,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.id", is(reviewDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(reviewDto.title())))
                 .andExpect(jsonPath("$.content", is(reviewDto.content())))
-                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
-                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime()
-                        .format(ofPattern(dateTimeFormat)))))
+                .andExpect(jsonPath("$.createdDateTime", is(reviewDto.createdDateTime().toString())))
+                .andExpect(jsonPath("$.updatedDateTime", is(reviewDto.updatedDateTime().toString())))
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).deleteLikeOrDislike(anyLong(), anyLong(), any());

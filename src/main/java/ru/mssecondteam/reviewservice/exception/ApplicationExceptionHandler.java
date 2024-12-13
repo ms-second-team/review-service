@@ -38,9 +38,9 @@ public class ApplicationExceptionHandler {
         return errorResponse;
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public ErrorResponse handleMetÒhodArgumentNotValidException(MethodArgumentNotValidException ex) {
         Map<String, String> exceptions = new HashMap<>();
         for (ObjectError oe : ex.getBindingResult().getAllErrors()) {
             exceptions.put(oe.getObjectName(), oe.getDefaultMessage());

@@ -3,11 +3,11 @@ package ru.mssecondteam.reviewservice.service.like;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.dto.LikeDto;
+import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.model.Like;
-import ru.mssecondteam.reviewservice.repository.like.LikeRepository;
 import ru.mssecondteam.reviewservice.model.Review;
+import ru.mssecondteam.reviewservice.repository.like.LikeRepository;
 
 import java.util.List;
 import java.util.Map;
