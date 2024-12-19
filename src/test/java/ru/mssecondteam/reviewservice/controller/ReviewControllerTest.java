@@ -19,19 +19,19 @@ import ru.mssecondteam.reviewservice.dto.LikeDto;
 import ru.mssecondteam.reviewservice.dto.NewReviewRequest;
 import ru.mssecondteam.reviewservice.dto.ReviewDto;
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
+import ru.mssecondteam.reviewservice.dto.TopReviewsDto;
 import ru.mssecondteam.reviewservice.dto.UserReviewStats;
 import ru.mssecondteam.reviewservice.exception.NotAuthorizedException;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
 import ru.mssecondteam.reviewservice.model.TopReviews;
-import ru.mssecondteam.reviewservice.service.ReviewService;
-import ru.mssecondteam.reviewservice.service.like.LikeService;
+import ru.mssecondteam.reviewservice.service.helper.ReviewLikeService;
+import ru.mssecondteam.reviewservice.service.review.ReviewService;
 import ru.mssecondteam.reviewservice.service.stats.StatsService;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.is;
@@ -63,7 +63,7 @@ class ReviewControllerTest {
     private ReviewService reviewService;
 
     @MockBean
-    private LikeService likeService;
+    private ReviewLikeService reviewLikeService;
 
     @MockBean
     private StatsService statsService;
@@ -220,7 +220,7 @@ class ReviewControllerTest {
                 .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.errors", hasValue("Title can not be blank and must contain between 2 " +
-                        "and 100 symbols.")));
+                                                         "and 100 symbols.")));
 
         verify(reviewMapper, never()).toModel(any());
         verify(reviewService, never()).createReview(any(), any());
@@ -640,9 +640,7 @@ class ReviewControllerTest {
 
         when(reviewService.updateReview(reviewId, updateRequest, userId))
                 .thenReturn(review);
-        when(likeService.getNumberOfLikesAndDislikesByReviewId(review.getId()))
-                .thenReturn(likeDto);
-        when(reviewMapper.toDtoWithLikes(review, likeDto))
+        when(reviewLikeService.getReviewWithLikes(review))
                 .thenReturn(reviewDto);
 
         mvc.perform(patch("/reviews/{reviewId}", reviewId)
@@ -658,8 +656,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
-        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(review.getId());
-        verify(reviewMapper, times(1)).toDtoWithLikes(review, likeDto);
+        verify(reviewLikeService, times(1)).getReviewWithLikes(review);
     }
 
     @Test
@@ -674,9 +671,7 @@ class ReviewControllerTest {
 
         when(reviewService.updateReview(reviewId, updateRequest, userId))
                 .thenReturn(review);
-        when(likeService.getNumberOfLikesAndDislikesByReviewId(review.getId()))
-                .thenReturn(likeDto);
-        when(reviewMapper.toDtoWithLikes(review, likeDto))
+        when(reviewLikeService.getReviewWithLikes(review))
                 .thenReturn(reviewDto);
 
         mvc.perform(patch("/reviews/{reviewId}", reviewId)
@@ -692,8 +687,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
-        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(review.getId());
-        verify(reviewMapper, times(1)).toDtoWithLikes(review, likeDto);
+        verify(reviewLikeService, times(1)).getReviewWithLikes(review);
     }
 
     @Test
@@ -707,9 +701,7 @@ class ReviewControllerTest {
 
         when(reviewService.updateReview(reviewId, updateRequest, userId))
                 .thenReturn(review);
-        when(likeService.getNumberOfLikesAndDislikesByReviewId(review.getId()))
-                .thenReturn(likeDto);
-        when(reviewMapper.toDtoWithLikes(review, likeDto))
+        when(reviewLikeService.getReviewWithLikes(review))
                 .thenReturn(reviewDto);
 
         mvc.perform(patch("/reviews/{reviewId}", reviewId)
@@ -725,8 +717,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
-        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(review.getId());
-        verify(reviewMapper, times(1)).toDtoWithLikes(review, likeDto);
+        verify(reviewLikeService, times(1)).getReviewWithLikes(review);
     }
 
     @Test
@@ -739,9 +730,7 @@ class ReviewControllerTest {
 
         when(reviewService.updateReview(reviewId, updateRequest, userId))
                 .thenReturn(review);
-        when(likeService.getNumberOfLikesAndDislikesByReviewId(review.getId()))
-                .thenReturn(likeDto);
-        when(reviewMapper.toDtoWithLikes(review, likeDto))
+        when(reviewLikeService.getReviewWithLikes(review))
                 .thenReturn(reviewDto);
 
         mvc.perform(patch("/reviews/{reviewId}", reviewId)
@@ -757,8 +746,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
-        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(review.getId());
-        verify(reviewMapper, times(1)).toDtoWithLikes(review, likeDto);
+        verify(reviewLikeService, times(1)).getReviewWithLikes(review);
     }
 
     @Test
@@ -770,9 +758,7 @@ class ReviewControllerTest {
 
         when(reviewService.updateReview(reviewId, updateRequest, userId))
                 .thenReturn(review);
-        when(likeService.getNumberOfLikesAndDislikesByReviewId(review.getId()))
-                .thenReturn(likeDto);
-        when(reviewMapper.toDtoWithLikes(review, likeDto))
+        when(reviewLikeService.getReviewWithLikes(review))
                 .thenReturn(reviewDto);
 
         mvc.perform(patch("/reviews/{reviewId}", reviewId)
@@ -788,8 +774,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).updateReview(reviewId, updateRequest, userId);
-        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(review.getId());
-        verify(reviewMapper, times(1)).toDtoWithLikes(review, likeDto);
+        verify(reviewLikeService, times(1)).getReviewWithLikes(review);
     }
 
     @Test
@@ -844,9 +829,7 @@ class ReviewControllerTest {
     void findReviewById_whenReviewFound_shouldReturnReview() {
         when(reviewService.findReviewById(reviewId, userId))
                 .thenReturn(review);
-        when(likeService.getNumberOfLikesAndDislikesByReviewId(review.getId()))
-                .thenReturn(likeDto);
-        when(reviewMapper.toDtoWithLikes(review, likeDto))
+        when(reviewLikeService.getReviewWithLikes(review))
                 .thenReturn(reviewDto);
 
         mvc.perform(get("/reviews/{reviewId}", reviewId)
@@ -860,8 +843,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).findReviewById(reviewId, userId);
-        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(review.getId());
-        verify(reviewMapper, times(1)).toDtoWithLikes(review, likeDto);
+        verify(reviewLikeService, times(1)).getReviewWithLikes(review);
     }
 
     @Test
@@ -888,7 +870,7 @@ class ReviewControllerTest {
         Long eventId = 34L;
         when(reviewService.findReviewsByEventId(eventId, 0, 10, userId))
                 .thenReturn(Collections.singletonList(review));
-        when(reviewMapper.toDtoListWithLikes(Collections.singletonList(review), Collections.emptyMap()))
+        when(reviewLikeService.getReviewsWithLikes(Collections.singletonList(review)))
                 .thenReturn(Collections.singletonList(reviewDto));
 
         mvc.perform(get("/reviews")
@@ -904,8 +886,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.[0].mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).findReviewsByEventId(eventId, 0, 10, userId);
-        verify(reviewMapper, times(1)).toDtoListWithLikes(Collections.singletonList(review),
-                Collections.emptyMap());
+        verify(reviewLikeService, times(1)).getReviewsWithLikes(Collections.singletonList(review));
     }
 
     @Test
@@ -958,9 +939,7 @@ class ReviewControllerTest {
     void addLike_shouldReturn200Status() {
         when(reviewService.addLikeOrDislike(anyLong(), anyLong(), any()))
                 .thenReturn(review);
-        when(likeService.getNumberOfLikesAndDislikesByReviewId(anyLong()))
-                .thenReturn(likeDto);
-        when(reviewMapper.toDtoWithLikes(any(), any()))
+        when(reviewLikeService.getReviewWithLikes(review))
                 .thenReturn(reviewDto);
 
         mvc.perform(post("/reviews/1/like")
@@ -976,8 +955,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).addLikeOrDislike(anyLong(), anyLong(), any());
-        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(any());
-        verify(reviewMapper, times(1)).toDtoWithLikes(any(), any());
+        verify(reviewLikeService, times(1)).getReviewWithLikes(any());
     }
 
     @Test
@@ -1016,9 +994,7 @@ class ReviewControllerTest {
     void addDislike_shouldReturn200Status() {
         when(reviewService.addLikeOrDislike(anyLong(), anyLong(), any()))
                 .thenReturn(review);
-        when(likeService.getNumberOfLikesAndDislikesByReviewId(anyLong()))
-                .thenReturn(likeDto);
-        when(reviewMapper.toDtoWithLikes(any(), any()))
+        when(reviewLikeService.getReviewWithLikes(review))
                 .thenReturn(reviewDto);
 
         mvc.perform(post("/reviews/1/dislike")
@@ -1034,8 +1010,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).addLikeOrDislike(anyLong(), anyLong(), any());
-        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(any());
-        verify(reviewMapper, times(1)).toDtoWithLikes(any(), any());
+        verify(reviewLikeService, times(1)).getReviewWithLikes(any());
     }
 
     @Test
@@ -1074,9 +1049,7 @@ class ReviewControllerTest {
     void deleteLike_shouldReturn200Status() {
         when(reviewService.deleteLikeOrDislike(anyLong(), anyLong(), any()))
                 .thenReturn(review);
-        when(likeService.getNumberOfLikesAndDislikesByReviewId(anyLong()))
-                .thenReturn(likeDto);
-        when(reviewMapper.toDtoWithLikes(any(), any()))
+        when(reviewLikeService.getReviewWithLikes(review))
                 .thenReturn(reviewDto);
 
         mvc.perform(delete("/reviews/1/like")
@@ -1092,8 +1065,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).deleteLikeOrDislike(anyLong(), anyLong(), any());
-        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(any());
-        verify(reviewMapper, times(1)).toDtoWithLikes(any(), any());
+        verify(reviewLikeService, times(1)).getReviewWithLikes(any());
     }
 
     @Test
@@ -1117,9 +1089,7 @@ class ReviewControllerTest {
     void deleteDislike_shouldReturn200Status() {
         when(reviewService.deleteLikeOrDislike(anyLong(), anyLong(), any()))
                 .thenReturn(review);
-        when(likeService.getNumberOfLikesAndDislikesByReviewId(anyLong()))
-                .thenReturn(likeDto);
-        when(reviewMapper.toDtoWithLikes(any(), any()))
+        when(reviewLikeService.getReviewWithLikes(review))
                 .thenReturn(reviewDto);
 
         mvc.perform(delete("/reviews/1/dislike")
@@ -1135,8 +1105,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.mark", is(reviewDto.mark())));
 
         verify(reviewService, times(1)).deleteLikeOrDislike(anyLong(), anyLong(), any());
-        verify(likeService, times(1)).getNumberOfLikesAndDislikesByReviewId(any());
-        verify(reviewMapper, times(1)).toDtoWithLikes(any(), any());
+        verify(reviewLikeService, times(1)).getReviewWithLikes(any());
     }
 
     @Test
@@ -1162,17 +1131,13 @@ class ReviewControllerTest {
         Review badReview = createReview(23);
         ReviewDto badReviewDto = createReviewDto(342);
         TopReviews topReviews = new TopReviews(Collections.singletonList(review), Collections.singletonList(badReview));
+        TopReviewsDto topReviewsDto = new TopReviewsDto(Collections.singletonList(reviewDto),
+                Collections.singletonList(badReviewDto));
 
         when(reviewService.getTopReviews(eventId))
                 .thenReturn(topReviews);
-        when(likeService.getNumberOfLikesAndDislikesByListReviewsId(Collections.singletonList(review.getId())))
-                .thenReturn(Map.of(review.getId(), likeDto));
-        when(reviewMapper.toDtoListWithLikes(Collections.singletonList(review), Map.of(review.getId(), likeDto)))
-                .thenReturn(Collections.singletonList(reviewDto));
-        when(likeService.getNumberOfLikesAndDislikesByListReviewsId(Collections.singletonList(badReview.getId())))
-                .thenReturn(Map.of(badReview.getId(), likeDto));
-        when(reviewMapper.toDtoListWithLikes(Collections.singletonList(badReview), Map.of(badReview.getId(), likeDto)))
-                .thenReturn(Collections.singletonList(badReviewDto));
+        when(reviewLikeService.getLikesAndMapToDto(topReviews))
+                .thenReturn(topReviewsDto);
 
         mvc.perform(get("/reviews/top")
                         .param("eventId", String.valueOf(eventId)))
@@ -1183,14 +1148,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.worstReviews.[0].id", is(badReviewDto.id()), Long.class));
 
         verify(reviewService, times(1)).getTopReviews(eventId);
-        verify(likeService, times(1)).getNumberOfLikesAndDislikesByListReviewsId(
-                Collections.singletonList(review.getId()));
-        verify(reviewMapper, times(1)).toDtoListWithLikes(
-                Collections.singletonList(review), Map.of(review.getId(), likeDto));
-        verify(likeService, times(1)).getNumberOfLikesAndDislikesByListReviewsId(
-                Collections.singletonList(badReview.getId()));
-        verify(reviewMapper, times(1)).toDtoListWithLikes(
-                Collections.singletonList(badReview), Map.of(badReview.getId(), likeDto));
+        verify(reviewLikeService, times(1)).getLikesAndMapToDto(topReviews);
     }
 
     @Test

@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice.service;
+package ru.mssecondteam.reviewservice.service.helper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

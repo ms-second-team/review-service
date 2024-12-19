@@ -27,7 +27,7 @@ import ru.mssecondteam.reviewservice.dto.event.TeamMemberRole;
 import ru.mssecondteam.reviewservice.dto.registration.RegistrationResponseDto;
 import ru.mssecondteam.reviewservice.dto.registration.RegistrationStatus;
 import ru.mssecondteam.reviewservice.model.Review;
-import ru.mssecondteam.reviewservice.service.ReviewService;
+import ru.mssecondteam.reviewservice.service.review.ReviewService;
 
 import java.time.LocalDateTime;
 import java.util.List;

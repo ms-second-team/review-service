@@ -16,6 +16,6 @@ public interface EventClient {
     @GetMapping("/events/{eventId}")
     ResponseEntity<EventDto> getEventById(@RequestHeader("X-User-Id") Long userId, @PathVariable Long eventId);
 
-    @GetMapping("/events/teams/{eventId}")
+    @GetMapping("/events/{eventId}/teams")
     ResponseEntity<List<TeamMemberDto>> getTeamsByEventId(@RequestHeader("X-User-Id") Long userId, @PathVariable Long eventId);
 }

@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice.service;
+package ru.mssecondteam.reviewservice.service.review;
 
 import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.model.Review;
