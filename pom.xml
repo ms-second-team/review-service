@@ -10,7 +10,7 @@
   </parent>
   <groupId>ru.ms-second-team</groupId>
   <artifactId>review-service</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <name>review-service</name>
   <description>review-service</description>
   <properties>
