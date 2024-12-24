@@ -36,7 +36,7 @@
 
 • **GET** _/reviews?page={page}&size={size}&userId={userId}&eventId={eventId}_ - поиск отзывов с пагинацией. Возможность фильтрации по id события и/или id автора;
 
-• **DELETE** _/reviews/{reviewId}_ - удаление отзыва по id.
+• **DELETE** _/reviews/{reviewId}_ - удаление отзыва по id;
 
 • **POST** _/reviews/{reviewId}/like_ - поставить лайк отзыву;
 
@@ -50,7 +50,7 @@
 
 • **GET** _/reviews/stats/events/{eventId}_ - получение аналитики по событию;
 
-• **GET** _/reviews/stats/users/{userId}_ - получение аналитики по пользователю;
+• **GET** _/reviews/stats/users/{userId}_ - получение аналитики по пользователю.
 
 ## Запустить микросервис можно двумя способами.
 ### Первый способ:
@@ -65,7 +65,7 @@
 •	Микросервис будет доступен по адресу: _http://localhost:8060_.
 
 ### Второй способ:
-•	Установить и запустить Docker.
+•	Установить и запустить _Docker_.
 
 •	Запустить контейнер командой `docker-compose up`.
 
