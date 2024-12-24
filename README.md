@@ -6,13 +6,13 @@
 Микросервис написан на Java 21 и Spring Boot 3.
 
 ## Микросервис разрабатывали:
-• [Владимир Баханович] (https://github.com/vvbakhanovich);
+• [Владимир Баханович](https://github.com/vvbakhanovich)
 
-• [Виктор Вагнер] (https://github.com/Vagner-Viktor);
+• [Виктор Вагнер](https://github.com/Vagner-Viktor)
 
-• [Карен Петросян] (https://github.com/kapetrosyan1);
+• [Карен Петросян](https://github.com/kapetrosyan1)
 
-• [Галина Лобачёва] (https://github.com/KoshanSky1).
+• [Галина Лобачёва](https://github.com/KoshanSky1)
 
 ## Технологический стек:
 ![](https://camo.githubusercontent.com/270dd3f671d1645fc7af25d667bb2edc3a56937650e211fd438d01d45a0c4ef4/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4a6176612d2532334646373830303f7374796c653d706c6173746963)
