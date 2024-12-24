@@ -28,48 +28,48 @@
 ![](https://camo.githubusercontent.com/709af8eea5ce7135de90589399f9a208dd532c4858bf1cb2a2aefcec2e15c63e/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4a556e69742d2532333235413136323f7374796c653d706c6173746963266c6f676f3d6a756e697435266c6f676f436f6c6f723d7768697465)
 
 ## Эндпоинты:
-• POST /reviews - создание отзыва;
+• **POST** _/reviews_ - создание отзыва;
 
-• PATCH /reviews - обновление отзыва;
+• **PATCH** _/reviews_ - обновление отзыва;
 
-• GET /reviews/{reviewId} - получение отзыва по id;
+• **GET** _/reviews/{reviewId}_ - получение отзыва по id;
 
-• GET /reviews?page={page}&size={size}&userId={userId}&eventId={eventId} - поиск отзывов с пагинацией. Возможность фильтрации по id события и/или id автора;
+• **GET** _/reviews?page={page}&size={size}&userId={userId}&eventId={eventId}_ - поиск отзывов с пагинацией. Возможность фильтрации по id события и/или id автора;
 
-• DELETE /reviews/{reviewId} - удаление отзыва по id.
+• **DELETE** _/reviews/{reviewId}_ - удаление отзыва по id.
 
-• POST /reviews/{reviewId}/like - поставить лайк отзыву;
+• **POST** _/reviews/{reviewId}/like_ - поставить лайк отзыву;
 
-• DELETE /reviews/{reviewId}/like - удалить лайк у отзыва;
+• **DELETE** _/reviews/{reviewId}/like_ - удалить лайк у отзыва;
 
-• POST /reviews/{reviewId}/dislike - поставить дизлайк отзыву;
+• **POST** _/reviews/{reviewId}/dislike_ - поставить дизлайк отзыву;
 
-• DELETE /reviews/{reviewId}/dislike - удалить дизлайк у отзыва;
+• **DELETE** _/reviews/{reviewId}/dislike_ - удалить дизлайк у отзыва;
 
-• GET /reviews/top?eventId={eventId} - получение трех лучших и худших отзывов по событию;
+• **GET** _/reviews/top?eventId={eventId}_ - получение трех лучших и худших отзывов по событию;
 
-• GET /reviews/stats/events/{eventId} - получение аналитики по событию;
+• **GET** _/reviews/stats/events/{eventId}_ - получение аналитики по событию;
 
-• GET /reviews/stats/users/{userId} - получение аналитики по пользователю;
+• **GET** _/reviews/stats/users/{userId}_ - получение аналитики по пользователю;
 
 ## Запустить микросервис можно двумя способами.
 ### Первый способ:
-•	Предварительно создать БД POSTGRES не ниже версии 15 с именем "review-db".
+•	Предварительно создать БД POSTGRES не ниже версии 15 с именем "_review-db_".
 
 •	Установить и запустить Docker. Необходимо для выполнения тестов с использованием test-containers.
 
-•	Собрать jar файл при помощи maven командой mvn clean install.
+•	Собрать jar файл при помощи maven командой `mvn clean install`.
 
-•	Запустить микросервис командой java -jar review-service-1.0.0-SNAPSHOT.jar.
+•	Запустить микросервис командой `java -jar review-service-1.0.0-SNAPSHOT.jar`.
 
-•	Микросервис будет доступен по адресу: http://localhost:8060.
+•	Микросервис будет доступен по адресу: _http://localhost:8060_.
 
 ### Второй способ:
 •	Установить и запустить Docker.
 
 •	Запустить контейнер командой docker compose up.
 
-•	Микросервис будет доступен по адресу: http://localhost:8060.
+•	Микросервис будет доступен по адресу: _http://localhost:8060_.
 
 ### После запуска микросервиса API документация будет доступна по ссылке:
-http://localhost:8060/swagger-ui/index.html
+_http://localhost:8060/swagger-ui/index.html_
