@@ -12,6 +12,7 @@ import ru.mssecondteam.reviewservice.dto.event.TeamMemberRole;
 import ru.mssecondteam.reviewservice.exception.NotAuthorizedException;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.exception.ValidationException;
+import ru.mssecondteam.reviewservice.service.helper.EventServiceHelper;
 
 import java.time.LocalDateTime;
 import java.util.List;

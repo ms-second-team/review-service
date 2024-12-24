@@ -26,6 +26,7 @@ import ru.mssecondteam.reviewservice.dto.registration.RegistrationStatus;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.model.Review;
 import ru.mssecondteam.reviewservice.service.like.LikeService;
+import ru.mssecondteam.reviewservice.service.review.ReviewService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -518,7 +519,7 @@ class LikeServiceImplTest {
                         .withHeader("Content-Type", APPLICATION_JSON_VALUE)
                         .withBody(objectMapper.writeValueAsString(getEventByIdResponse))));
 
-        stubFor(get(urlPathMatching("/events/teams/\\d+"))
+        stubFor(get(urlPathMatching("/events/\\d+/teams"))
                 .willReturn(aResponse()
                         .withStatus(OK.value())
                         .withHeader("Content-Type", APPLICATION_JSON_VALUE)

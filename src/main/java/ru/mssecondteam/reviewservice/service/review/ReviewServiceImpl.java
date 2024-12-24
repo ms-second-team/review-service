@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice.service;
+package ru.mssecondteam.reviewservice.service.review;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +13,8 @@ import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
 import ru.mssecondteam.reviewservice.model.TopReviews;
 import ru.mssecondteam.reviewservice.repository.ReviewRepository;
+import ru.mssecondteam.reviewservice.service.helper.EventServiceHelper;
+import ru.mssecondteam.reviewservice.service.helper.RegistrationServiceHelper;
 import ru.mssecondteam.reviewservice.service.like.LikeService;
 
 import java.util.List;

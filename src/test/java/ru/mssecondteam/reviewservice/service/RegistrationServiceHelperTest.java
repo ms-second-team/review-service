@@ -12,6 +12,7 @@ import ru.mssecondteam.reviewservice.dto.registration.RegistrationResponseDto;
 import ru.mssecondteam.reviewservice.dto.registration.RegistrationStatus;
 import ru.mssecondteam.reviewservice.exception.NotFoundException;
 import ru.mssecondteam.reviewservice.exception.ValidationException;
+import ru.mssecondteam.reviewservice.service.helper.RegistrationServiceHelper;
 
 import java.util.Collections;
 import java.util.List;
