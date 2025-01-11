@@ -17,7 +17,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.mssecondteam.reviewservice.dto.LikeDto;
+import ru.mssecondteam.reviewservice.dto.like.LikeDto;
 import ru.mssecondteam.reviewservice.dto.event.EventDto;
 import ru.mssecondteam.reviewservice.dto.event.TeamMemberDto;
 import ru.mssecondteam.reviewservice.dto.event.TeamMemberRole;

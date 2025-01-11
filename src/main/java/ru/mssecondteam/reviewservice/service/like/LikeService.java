@@ -1,6 +1,6 @@
 package ru.mssecondteam.reviewservice.service.like;
 
-import ru.mssecondteam.reviewservice.dto.LikeDto;
+import ru.mssecondteam.reviewservice.dto.like.LikeDto;
 import ru.mssecondteam.reviewservice.model.Review;
 
 import java.util.List;

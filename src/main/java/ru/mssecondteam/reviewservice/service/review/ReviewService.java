@@ -1,6 +1,6 @@
 package ru.mssecondteam.reviewservice.service.review;
 
-import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
+import ru.mssecondteam.reviewservice.dto.review.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.model.Review;
 import ru.mssecondteam.reviewservice.model.TopReviews;
 

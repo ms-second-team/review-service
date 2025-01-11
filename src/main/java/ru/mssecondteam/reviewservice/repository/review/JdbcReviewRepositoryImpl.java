@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice.repository;
+package ru.mssecondteam.reviewservice.repository.review;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;

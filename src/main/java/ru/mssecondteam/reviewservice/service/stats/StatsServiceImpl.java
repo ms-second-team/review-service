@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.mssecondteam.reviewservice.dto.EventReviewStats;
-import ru.mssecondteam.reviewservice.dto.UserReviewStats;
+import ru.mssecondteam.reviewservice.dto.stats.EventReviewStats;
+import ru.mssecondteam.reviewservice.dto.stats.UserReviewStats;
 import ru.mssecondteam.reviewservice.repository.stats.StatsRepository;
 
 import java.util.List;

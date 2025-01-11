@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice.dto;
+package ru.mssecondteam.reviewservice.dto.like;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

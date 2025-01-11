@@ -2,9 +2,9 @@ package ru.mssecondteam.reviewservice.service.helper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.mssecondteam.reviewservice.dto.LikeDto;
-import ru.mssecondteam.reviewservice.dto.ReviewDto;
-import ru.mssecondteam.reviewservice.dto.TopReviewsDto;
+import ru.mssecondteam.reviewservice.dto.like.LikeDto;
+import ru.mssecondteam.reviewservice.dto.review.ReviewDto;
+import ru.mssecondteam.reviewservice.dto.review.TopReviewsDto;
 import ru.mssecondteam.reviewservice.mapper.ReviewMapper;
 import ru.mssecondteam.reviewservice.model.Review;
 import ru.mssecondteam.reviewservice.model.TopReviews;

@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.mssecondteam.reviewservice.dto.ReviewUpdateRequest;
+import ru.mssecondteam.reviewservice.dto.review.ReviewUpdateRequest;
 import ru.mssecondteam.reviewservice.dto.event.EventDto;
 import ru.mssecondteam.reviewservice.dto.event.TeamMemberDto;
 import ru.mssecondteam.reviewservice.dto.event.TeamMemberRole;

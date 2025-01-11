@@ -1,4 +1,4 @@
-package ru.mssecondteam.reviewservice.dto;
+package ru.mssecondteam.reviewservice.dto.review;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
