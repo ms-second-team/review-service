@@ -19,6 +19,19 @@ public class StatsRepositoryImpl implements StatsRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
+    private final String statsSql = """
+            SELECT r.%1$s,
+            (SELECT AVG(r.mark) FROM reviews r WHERE r.%1$s = :%2$s AND r.review_id IN (:reviewIds)) AS average_mark, 
+            (SELECT COUNT(*) FROM reviews r WHERE r.%1$s = :%2$s) AS total_marks, 
+            (100.0 * (SELECT COUNT(*) FROM reviews r WHERE r.%1$s = :%2$s AND r.mark >= :minPositiveMark) / 
+            (SELECT COUNT(*) FROM reviews r WHERE r.%1$s = :%2$s)) AS positive_mark_percentage, 
+            (100.0 * (SELECT COUNT(*) FROM reviews r WHERE r.%1$s = :%2$s AND r.mark < :minPositiveMark) / 
+            (SELECT COUNT(*) FROM reviews r WHERE r.%1$s = :%2$s)) AS negative_mark_percentage 
+            FROM reviews r 
+            WHERE r.%1$s = :%2$s 
+            GROUP BY r.%1$s
+            """;
+
     @Override
     public EventReviewStats getReviewStatsForEvent(Long eventId, int minPositiveMark, List<Long> reviewIds) {
         SqlParameterSource namedParams = new MapSqlParameterSource()
@@ -26,18 +39,8 @@ public class StatsRepositoryImpl implements StatsRepository {
                 .addValue("minPositiveMark", minPositiveMark)
                 .addValues(Collections.singletonMap("reviewIds", reviewIds));
 
-        final String sql = "select r.event_id as event_id, " +
-                "(select AVG(r.mark) " +
-                "from reviews r where r.event_id = :eventId and r.review_id in (:reviewIds)) AS average_mark, " +
-                "(select COUNT(*) from reviews r where r.event_id = :eventId) AS total_marks, " +
-                "(100.0 * (select count(*) from reviews r where r.event_id = :eventId and r.mark >= :minPositiveMark) / " +
-                "(select COUNT(*) from reviews r where r.event_id = :eventId)) AS positive_mark_percentage," +
-                "(100.0 * (select count(*) from reviews r where r.event_id = :eventId and r.mark < :minPositiveMark) / " +
-                "(select COUNT(*) from reviews r where r.event_id = :eventId)) AS negative_mark_percentage " +
-                "FROM reviews r " +
-                "WHERE r.event_id = :eventId " +
-                "GROUP BY r.event_id";
-        return jdbcTemplate.query(sql, namedParams, this::mapToEventReviewStats);
+        final String eventStatsSql = String.format(statsSql, "event_id", "eventId");
+        return jdbcTemplate.query(eventStatsSql, namedParams, this::mapToEventReviewStats);
     }
 
     @Override
@@ -47,18 +50,8 @@ public class StatsRepositoryImpl implements StatsRepository {
                 .addValue("minPositiveMark", minPositiveMark)
                 .addValues(Collections.singletonMap("reviewIds", reviewIds));
 
-        final String sql = "select r.author_id as author_id, " +
-                "(select AVG(r.mark) " +
-                "from reviews r where r.author_id = :authorId and r.review_id in (:reviewIds)) AS average_mark," +
-                "(select COUNT(*) from reviews r where r.author_id = :authorId) AS total_marks," +
-                "(100.0 * (select count(*) from reviews r where r.author_id = :authorId and r.mark >= :minPositiveMark) / " +
-                "(select COUNT(*) from reviews r where r.author_id = :authorId))  AS positive_mark_percentage," +
-                "(100.0 * (select count(*) from reviews r where r.author_id = :authorId and r.mark < :minPositiveMark) / " +
-                "(select COUNT(*) from reviews r where r.author_id = :authorId))  AS negative_mark_percentage " +
-                "FROM reviews r " +
-                "where r.author_id = :authorId " +
-                "GROUP BY r.author_id";
-        return jdbcTemplate.query(sql, namedParams, this::mapToUserReviewStats);
+        final String userStatsSql = String.format(statsSql, "author_id", "authorId");
+        return jdbcTemplate.query(userStatsSql, namedParams, this::mapToUserReviewStats);
     }
 
     @Override
