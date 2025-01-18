@@ -1,7 +1,7 @@
 package ru.mssecondteam.reviewservice.repository.stats;
 
-import ru.mssecondteam.reviewservice.dto.EventReviewStats;
-import ru.mssecondteam.reviewservice.dto.UserReviewStats;
+import ru.mssecondteam.reviewservice.dto.stats.EventReviewStats;
+import ru.mssecondteam.reviewservice.dto.stats.UserReviewStats;
 
 import java.util.List;
 

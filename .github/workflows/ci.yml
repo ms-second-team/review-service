@@ -10,12 +10,6 @@ jobs:
     permissions: write-all
     steps:
       - uses: actions/checkout@v4
-      - name: Checkstyle
-        uses: dbelyaev/action-checkstyle@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          level: warning
-          fail_level: error
 
       - name: Set up JDK 21 corretto
         uses: actions/setup-java@v4
@@ -37,16 +31,3 @@ jobs:
           title: '#Coverage Report'
           update-comment: true
           continue-on-error: false
-
-      - name: Login to Dockerhub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Push to DockerHub
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/review-service

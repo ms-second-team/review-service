@@ -5,8 +5,8 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
-import ru.mssecondteam.reviewservice.dto.EventReviewStats;
-import ru.mssecondteam.reviewservice.dto.UserReviewStats;
+import ru.mssecondteam.reviewservice.dto.stats.EventReviewStats;
+import ru.mssecondteam.reviewservice.dto.stats.UserReviewStats;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,46 +19,84 @@ public class StatsRepositoryImpl implements StatsRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
+    private final String statsSql = """
+            SELECT r.%1$s,
+                (
+                SELECT AVG(r.mark) 
+                FROM reviews r 
+                WHERE r.%1$s = :%1$s 
+                    AND r.review_id IN (:reviewIds)
+                ) AS average_mark, 
+                (
+                SELECT COUNT(*) 
+                FROM reviews r 
+                WHERE r.%1$s = :%1$s
+                ) AS total_marks, 
+                (
+                100.0 * (
+                    SELECT COUNT(*) 
+                    FROM reviews r 
+                    WHERE r.%1$s = :%1$s 
+                        AND r.mark >= :minPositiveMark
+                ) / (
+                    SELECT COUNT(*) 
+                    FROM reviews r 
+                    WHERE r.%1$s = :%1$s)
+                ) AS positive_mark_percentage, 
+                (
+                100.0 * (
+                    SELECT COUNT(*) 
+                    FROM reviews r 
+                    WHERE r.%1$s = :%1$s 
+                        AND r.mark < :minPositiveMark
+                ) / (
+                    SELECT COUNT(*) 
+                    FROM reviews r 
+                    WHERE r.%1$s = :%1$s)
+                ) AS negative_mark_percentage  
+            FROM reviews r 
+            WHERE r.%1$s = :%1$s 
+            GROUP BY r.%1$s
+            """;
+
+    /**
+     * Retrieve review statistics for an event.
+     *
+     * @param eventId id of the event. In SqlParameterSource object paramName should be the same as sql param in db. So
+     *                when formatting eventStatsSql all parameters will be viable.
+     * @param minPositiveMark minimum positive mark to evaluate reviews
+     * @param reviewIds list of reviews ids to analyze
+     * @return review statistics for an event
+     */
     @Override
     public EventReviewStats getReviewStatsForEvent(Long eventId, int minPositiveMark, List<Long> reviewIds) {
         SqlParameterSource namedParams = new MapSqlParameterSource()
-                .addValue("eventId", eventId)
+                .addValue("event_id", eventId)
                 .addValue("minPositiveMark", minPositiveMark)
                 .addValues(Collections.singletonMap("reviewIds", reviewIds));
 
-        final String sql = "select r.event_id as event_id, " +
-                "(select AVG(r.mark) " +
-                "from reviews r where r.event_id = :eventId and r.review_id in (:reviewIds)) AS average_mark, " +
-                "(select COUNT(*) from reviews r where r.event_id = :eventId) AS total_marks, " +
-                "(100.0 * (select count(*) from reviews r where r.event_id = :eventId and r.mark >= :minPositiveMark) / " +
-                "(select COUNT(*) from reviews r where r.event_id = :eventId)) AS positive_mark_percentage," +
-                "(100.0 * (select count(*) from reviews r where r.event_id = :eventId and r.mark < :minPositiveMark) / " +
-                "(select COUNT(*) from reviews r where r.event_id = :eventId)) AS negative_mark_percentage " +
-                "FROM reviews r " +
-                "WHERE r.event_id = :eventId " +
-                "GROUP BY r.event_id";
-        return jdbcTemplate.query(sql, namedParams, this::mapToEventReviewStats);
+        final String eventStatsSql = String.format(statsSql, "event_id");
+        return jdbcTemplate.query(eventStatsSql, namedParams, this::mapToEventReviewStats);
     }
 
+    /**
+     * Retrieve review statistics for user.
+     *
+     * @param authorId id of the author. In SqlParameterSource object paramName should be the same as sql param in db. So
+     *                when formatting userStatsSql all parameters will be viable.
+     * @param minPositiveMark minimum positive mark to evaluate reviews
+     * @param reviewIds list of reviews ids to analyze
+     * @return review statistics for user
+     */
     @Override
     public UserReviewStats getReviewStatsForUser(Long authorId, int minPositiveMark, List<Long> reviewIds) {
         SqlParameterSource namedParams = new MapSqlParameterSource()
-                .addValue("authorId", authorId)
+                .addValue("author_id", authorId)
                 .addValue("minPositiveMark", minPositiveMark)
                 .addValues(Collections.singletonMap("reviewIds", reviewIds));
 
-        final String sql = "select r.author_id as author_id, " +
-                "(select AVG(r.mark) " +
-                "from reviews r where r.author_id = :authorId and r.review_id in (:reviewIds)) AS average_mark," +
-                "(select COUNT(*) from reviews r where r.author_id = :authorId) AS total_marks," +
-                "(100.0 * (select count(*) from reviews r where r.author_id = :authorId and r.mark >= :minPositiveMark) / " +
-                "(select COUNT(*) from reviews r where r.author_id = :authorId))  AS positive_mark_percentage," +
-                "(100.0 * (select count(*) from reviews r where r.author_id = :authorId and r.mark < :minPositiveMark) / " +
-                "(select COUNT(*) from reviews r where r.author_id = :authorId))  AS negative_mark_percentage " +
-                "FROM reviews r " +
-                "where r.author_id = :authorId " +
-                "GROUP BY r.author_id";
-        return jdbcTemplate.query(sql, namedParams, this::mapToUserReviewStats);
+        final String userStatsSql = String.format(statsSql, "author_id");
+        return jdbcTemplate.query(userStatsSql, namedParams, this::mapToUserReviewStats);
     }
 
     @Override

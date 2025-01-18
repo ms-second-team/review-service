@@ -5,7 +5,7 @@ databaseChangeLog:
       changes:
         - sqlFile:
             dbms: postgresql
-            path: migrations/v1_create_reviews.sql
+            path: migrations/v001_create_reviews.sql
             relativeToChangelogFile: true
 
   - changeSet:
@@ -14,5 +14,5 @@ databaseChangeLog:
       changes:
           - sqlFile:
               dbms: postgresql
-              path: migrations/v2_create_likes.sql
+              path: migrations/v002_create_likes.sql
               relativeToChangelogFile: true
