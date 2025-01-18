@@ -141,7 +141,7 @@
           </dependency>
         </dependencies>
         <configuration>
-          <configLocation>src/main/resources/google_checks.xml</configLocation>
+          <configLocation>google_checks.xml</configLocation>
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <failOnViolation>true</failOnViolation>
           <logViolationsToConsole>true</logViolationsToConsole>
